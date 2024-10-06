@@ -18,3 +18,6 @@ Currently supported editions: `foil`, `holo`, `polychrome`, `negative` (Jokers o
 - `"no_(EDITION)s"` - Removes (EDITION) from every card.
 - `"no_(EDITION)_jokers` - Removes (EDITION) from jokers.
 - `"no_(EDITION)_cards"` - Removes (EDITION) from Playing Cards.
+
+## Note
+This mod is intended as a tool for other mods to use, and does not have any standalone functionality.
