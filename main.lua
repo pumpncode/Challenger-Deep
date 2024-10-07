@@ -262,7 +262,7 @@ function CardArea:update(dt)
 end
 
 -- test challenge
-SMODS.Challenge{
+--[[SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
@@ -278,6 +278,6 @@ SMODS.Challenge{
         banned_tags = {},
         banned_other = {}
     },
-    }
+    }]]--
 -------------------------------------------------
 ------------MOD CODE END----------------------
