@@ -25,7 +25,14 @@ return {
         
             ch_c_no_glitters = {"{C:dark_edition}Glitter{} cards will no longer appear {C:inactive}(Bunco)"},
             ch_c_no_glitter_cards = {"{C:attention}Playing cards{} can no longer be {C:dark_edition}Glitter {C:inactive}(Bunco)"},
-            ch_c_no_glitter_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Glitter {C:inactive}(Bunco)"}
+            ch_c_no_glitter_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Glitter {C:inactive}(Bunco)"},
+
+            ch_c_blind_scaling = {"All {C:attention}Blind requirements{} are multiplied by {C:red}X#1#"},
+
+            ch_c_minus_jokers_per_dollar = {"Hold {C:red}-1{} Jokers for every {C:money}$#1#{} you have"},
+            ch_c_overflow_perishable = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Perishable"},
+            ch_c_overflow_debuff = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Debuffed"}
+
         }
     }
 }

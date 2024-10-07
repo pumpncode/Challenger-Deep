@@ -11,10 +11,14 @@
 local Backapply_to_run_Ref = Back.apply_to_run
 function Back:apply_to_run()
     Backapply_to_run_Ref(self)
+
     --ALL EDITIONS
+
     G.GAME.modifiers.no_edition_cards = false --no edition cards
     G.GAME.modifiers.no_edition_jokers = false --no edition jokers
+
     --BASE GAME EDITIONS
+
     G.GAME.modifiers.no_foil_cards = false --no foil cards 
     G.GAME.modifiers.no_foil_jokers = false --no foil jokers
 
@@ -25,12 +29,22 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.no_polychrome_cards = false --no polychrome cards 
     G.GAME.modifiers.no_polychrome_jokers = false --no polychrome jokers
+
     --BUNCO EDITIONS
+
     G.GAME.modifiers.no_fluorescent_cards = false --no fluorescent cards 
     G.GAME.modifiers.no_fluorescent_jokers = false --no fluorescent jokers
 
     G.GAME.modifiers.no_glitter_cards = false --no glitter cards 
     G.GAME.modifiers.no_glitter_jokers = false --no glitter jokers
+
+    --JOKER FUN
+
+    G.GAME.modifiers.minus_jokers_per_dollar = 0
+    G.GAME.modifiers.overflow_perishable = false
+    G.GAME.modifiers.overflow_debuff = false
+
+    G.GAME.joker_overflow = false
     
 end
 
@@ -100,6 +114,21 @@ function Game:start_run(args)
                         G.GAME.modifiers.no_glitter_cards = true
                     elseif v.id == 'no_glitter_jokers' then --removes glitter edition from jokers
                         G.GAME.modifiers.no_glitter_jokers = true
+
+                        -- BLIND SCALING
+
+                    elseif v.id == 'blind_scaling' then -- multiplies blind requirement by value
+                        G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+
+                        -- JOKER FUN
+
+                    elseif v.id == 'minus_jokers_per_dollar' then -- -1 joker per value dollar
+                        G.GAME.modifiers.minus_jokers_per_dollar = v.value
+                    elseif v.id == 'overflow_perishable' then -- if jokers > joker slots, all jokers become perishable
+                        G.GAME.modifiers.overflow_perishable = true
+                    elseif v.id == 'overflow_debuff' then -- harsher version of last rule
+                        G.GAME.modifiers.overflow_debuff = true
+                    else
                     end
                     end
                 end
@@ -173,12 +202,72 @@ function Card:set_edition(edition, immediate, silent)
 end
 end
 
+local update_ca_ref = CardArea.update
+function CardArea:update(dt)
+    if self == G.hand then
+        if G.GAME.modifiers.minus_jokers_per_dollar > 0 then
+            self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
+            if math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk then
+                if math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
+                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots - math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
+                else
+                    G.jokers.config.card_limit = 0
+                end
+                self.config.last_poll_size_jk = math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
+            end
+        end
+        if #G.jokers.cards > G.jokers.config.card_limit then
+            G.GAME.joker_overflow = true --jokers are overflowing
+        else
+            G.GAME.joker_overflow = false --jokers are NOT overflowing
+        end
+        if G.GAME.modifiers.overflow_perishable then
+            if G.GAME.joker_overflow == true then
+                for k, v in ipairs(G.jokers.cards) do
+                    if not v.ability.perishable then
+                        v.ability.temp_perishable = true
+                        v:set_perishable()
+                    end
+                end
+            else
+                for k, v in ipairs(G.jokers.cards) do
+                    if v.ability.temp_perishable == true then
+                        v.ability.temp_perishable = false
+                        v.ability.perishable = false
+                    end
+                end
+            end
+        end
+        if G.GAME.modifiers.overflow_debuff then
+            if G.GAME.joker_overflow == true then
+                for k, v in ipairs(G.jokers.cards) do
+                    if not v.debuff then
+                        v.ability.temp_debuff = true
+                        v.debuff = true
+                    end
+                end
+            else
+                for k, v in ipairs(G.jokers.cards) do
+                        if v.ability.temp_debuff then
+                        v.ability.temp_debuff = false
+                        v.debuff = false
+                        end
+                end
+            end
+        end
+    end
+    local result = update_ca_ref(self, dt)
+    
+    return result
+end
+
 -- test challenge
---[[SMODS.Challenge{
+SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
-        custom = {{id = 'no_editions'},
+        custom = {{id = 'minus_jokers_per_dollar', value = 5},
+                {id = 'overflow_debuff'}
                     },
         modifiers = {},
     },
@@ -189,6 +278,6 @@ end
         banned_tags = {},
         banned_other = {}
     },
-    }]]--
+    }
 -------------------------------------------------
 ------------MOD CODE END----------------------
