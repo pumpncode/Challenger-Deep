@@ -30,6 +30,22 @@ This is where most rules about Jokers will go.
 - `{id = "minus_jokers_per_dollar", value = x}` - Joker slots decreases by 1 for every $x, where x is a number. x cannot be zero, and I would suggest x is between 3 and 10.
 - `"overflow_perishable"` - When the player has more Jokers than Joker slots, every joker becomes Perishable. This is removed when the player has less Jokers than Joker slots.
 - `"overflow_debuff"` - When the player has more Jokers than Joker slots, every joker is debuffed. This is removed when the player has less Jokers than Joker slots.
+- `"overflow_debuff_one"` - A reworked version of `"overflow_debuff"` suggested by MiniRebel. For each Joker > Joker Slots, a random Joker is debuffed.
+- `"hand_per_joker"` - Player gains one hand per Joker owned.
+- `"minus_discard_per_joker"` - Player loses a discard per Joker owned.
+- `"enable_eternal_jokers"`, `"enable_rental_jokers"`,`"enable_perishable_jokers"` - Jokers can have the specified Sticker.
 
-## Note
-This mod is intended as a tool for other mods to use, and does not have any standalone functionality.
+### Shop Stuff
+
+Stuff relating to the Shop.
+- `"no_vouchers"` - Vouchers do not appear. (NOTE: Voucher Tag crashes the game when this is enabled.)
+
+### Miscellaneous
+
+- `{id = "win_ante", value = x}` - The player wins the game at Ante x instead of Ante 8.
+
+## Example Challenges
+
+There are a couple example challenges in this mod. More will be added soon!
+- Test - this is a challenge used by me in testing, to check if things work
+- Three-Body Problem - Pretty much an actual challenge, minus the bans. Shows how to use modifier rules from the base game, and some custom rules from Challenger Deep.
