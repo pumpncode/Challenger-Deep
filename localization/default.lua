@@ -31,8 +31,18 @@ return {
 
             ch_c_minus_jokers_per_dollar = {"Hold {C:red}-1{} Jokers for every {C:money}$#1#{} you have"},
             ch_c_overflow_perishable = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Perishable"},
-            ch_c_overflow_debuff = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Debuffed"}
+            ch_c_overflow_debuff = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Debuffed"},
+            ch_c_overflow_debuff_one = {"For each {C:attention}Joker{} over max {C:attention}Joker Slots{}, {C:red}debuff{} a Joker"},
 
+            ch_c_hand_per_joker = {"For each {C:attention}Joker{}, gain {C:blue}+1{} Hands"},
+            ch_c_minus_discard_per_joker = {"For each {C:attention}Joker{}, lose {C:red}1{} Discards"},
+            ch_c_enable_eternal_jokers = {"Jokers can be {C:attention}Eternal"},
+            ch_c_enable_rental_jokers = {"Jokers can be {C:attention}Rental"},
+            ch_c_enable_perishable_jokers = {"Jokers can be {C:attention}Perishable"},
+        
+            ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
+
+            ch_c_no_vouchers = {"No {C:attention}vouchers{} will appear in the shop"}
         }
     }
 }

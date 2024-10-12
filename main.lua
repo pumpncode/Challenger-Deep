@@ -43,8 +43,18 @@ function Back:apply_to_run()
     G.GAME.modifiers.minus_jokers_per_dollar = 0
     G.GAME.modifiers.overflow_perishable = false
     G.GAME.modifiers.overflow_debuff = false
+    G.GAME.modifiers.overflow_debuff_one = false
 
     G.GAME.joker_overflow = false
+    G.GAME.joker_overflow_size = 0
+    G.GAME.old_joker_overflow_size = 0
+
+    G.GAME.modifiers.hand_per_joker = false
+    G.GAME.modifiers.minus_discard_per_joker = false
+
+    --SHOP
+
+    G.GAME.modifiers.no_vouchers = false
     
 end
 
@@ -68,7 +78,7 @@ function Game:start_run(args)
                     elseif v.id == 'no_edition_jokers' then
                         G.GAME.modifiers.no_edition_jokers = true
 
-                        -- EDITIONS - BASE GAME
+                        -- EDITIONS - BASE GAME (note: it is recommended to ban corresponding tags for editions)
 
                     elseif v.id == 'no_foils' then --removes foil edition from all cards
                         G.GAME.modifiers.no_foil_cards = true
@@ -128,14 +138,52 @@ function Game:start_run(args)
                         G.GAME.modifiers.overflow_perishable = true
                     elseif v.id == 'overflow_debuff' then -- harsher version of last rule
                         G.GAME.modifiers.overflow_debuff = true
+                    elseif v.id == 'overflow_debuff_one' then --debuffs one Joker for each
+                        G.GAME.modifiers.overflow_debuff_one = true
+
+                    elseif v.id == 'hand_per_joker' then --gain hand per joker
+                        G.GAME.modifiers.hand_per_joker = true
+                    elseif v.id == 'minus_discard_per_joker' then --gain hand per joker
+                        G.GAME.modifiers.minus_discard_per_joker = true
+
+                    elseif v.id == 'enable_eternal_jokers' then --these 3 just do the same thing from stakes
+                        G.GAME.modifiers.enable_eternals_in_shop = true
+                    elseif v.id == 'enable_perishable_jokers' then
+                        G.GAME.modifiers.enable_perishables_in_shop = true
+                    elseif v.id == 'enable_rental_jokers' then
+                        G.GAME.modifiers.enable_rentals_in_shop = true
+                    
+                        -- SHOP STUFF
+
+                    elseif v.id == 'no_vouchers' then --no vouchers appear in shop (NOTE: BAN VOUCHER TAG)
+                        G.GAME.modifiers.no_vouchers = true
+
+                        -- MISCELLANEOUS
+
+                    elseif v.id == 'win_ante' then --sets win ante
+                        G.GAME.win_ante = v.value
                     else
                     end
                     end
                 end
             end
         end
-    return result
     end
+    if G.GAME.modifiers.no_vouchers then
+        G.GAME.current_round.voucher = nil
+    end
+    return result
+end
+
+local get_next_voucher_key_ref = get_next_voucher_key
+function get_next_voucher_key(_from_tag)
+    if G.GAME.modifiers.no_vouchers == true then
+        return nil
+    else
+        local result = get_next_voucher_key_ref(_from_tag)
+        return result
+    end
+    
 end
 
 local set_edition_ref = Card.set_edition
@@ -216,6 +264,7 @@ function CardArea:update(dt)
                 self.config.last_poll_size_jk = math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
             end
         end
+        local overflow = #G.jokers.cards - G.jokers.config.card_limit
         if #G.jokers.cards > G.jokers.config.card_limit then
             G.GAME.joker_overflow = true --jokers are overflowing
         else
@@ -255,20 +304,63 @@ function CardArea:update(dt)
                 end
             end
         end
+        if G.GAME.modifiers.overflow_debuff_one then
+            local jokers = {}
+            local debuffed_jokers = {}
+            local debuff = 0
+            for i = 1, #G.jokers.cards do
+                if G.jokers.cards[i].debuff or G.jokers.cards[i].ability.debuff_rule == true then 
+                    debuffed_jokers[#debuffed_jokers+1] = G.jokers.cards[i]
+                    debuff = debuff + 1 
+                    G.jokers.cards[i]:set_debuff(true)
+                end
+                if not G.jokers.cards[i].debuff then
+                    jokers[#jokers+1] = G.jokers.cards[i]
+                end
+            end
+            if overflow > debuff and #jokers > 0 then
+            for i = 0, overflow - debuff do
+                local card = pseudorandom_element(jokers)
+                    card.ability.debuff_rule = true
+                    card:set_debuff(true)
+            end
+            elseif overflow < debuff and #debuffed_jokers > 0 then
+                for i = 0, debuff - overflow do
+                    local card = pseudorandom_element(debuffed_jokers)
+                    card.ability.debuff_rule = false
+                    card:set_debuff(false)
+                end
+            end
+        end
+        if G.GAME.modifiers.hand_per_joker then
+            local base = G.GAME.starting_params.hands
+            G.GAME.round_resets.hands = base + #G.jokers.cards
+        end
+        if G.GAME.modifiers.minus_discard_per_joker then
+            local base = G.GAME.starting_params.discards
+            G.GAME.round_resets.discards = base - #G.jokers.cards
+        end
     end
     local result = update_ca_ref(self, dt)
     
     return result
 end
 
+local debuff_card_ref = Blind.debuff_card
+function Blind:debuff_card(card, from_blind)
+    local result = debuff_card_ref(self,card,from_blind)
+    if card.ability.debuff_rule then
+        card:set_debuff(true)
+    end
+    return result
+end
+
 -- test challenge
---[[SMODS.Challenge{
+SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
-        custom = {{id = 'minus_jokers_per_dollar', value = 5},
-                {id = 'overflow_debuff'}
-                    },
+        custom = {{id = 'no_vouchers'}},
         modifiers = {},
     },
     jokers = {
@@ -278,6 +370,31 @@ end
         banned_tags = {},
         banned_other = {}
     },
-    }]]--
+    }
+
+-- example challenge
+    SMODS.Challenge{
+        loc_txt = "Three-Body Problem",
+        key = 'threebody',
+        rules = {
+            custom = {{id = 'blind_scaling', value = 1.2},
+                        {id = 'win_ante', value = 10},
+                        {id = 'hand_per_joker'},
+                        {id = 'minus_discard_per_joker'},
+                        {id = 'enable_eternal_jokers'}},
+                        
+            modifiers = {{id = 'joker_slots', value = 3},
+                        {id = 'hands', value = 0},
+                        {id = 'discards', value = 6}},
+        },
+        jokers = {
+            {id = 'j_astronomer', eternal = true}
+        },
+        restrictions = {
+            banned_cards = {},
+            banned_tags = {},
+            banned_other = {}
+        },
+        }
 -------------------------------------------------
 ------------MOD CODE END----------------------
