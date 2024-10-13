@@ -38,9 +38,15 @@ function Back:apply_to_run()
     G.GAME.modifiers.no_glitter_cards = false --no glitter cards 
     G.GAME.modifiers.no_glitter_jokers = false --no glitter jokers
 
+    --BLINDS
+
+    G.GAME.modifiers.money_scaling = 1
+    G.GAME.modifiers.money_total_scaling = 1
+
     --JOKER FUN
 
     G.GAME.modifiers.minus_jokers_per_dollar = 0
+    G.GAME.modifiers.jokers_per_dollar = 0
     G.GAME.modifiers.overflow_perishable = false
     G.GAME.modifiers.overflow_debuff = false
     G.GAME.modifiers.overflow_debuff_one = false
@@ -52,10 +58,13 @@ function Back:apply_to_run()
     G.GAME.modifiers.hand_per_joker = false
     G.GAME.modifiers.minus_discard_per_joker = false
 
+    --STICKERS
+
+    G.GAME.modifiers.all_rental_jokers = false
+
     --SHOP
 
     G.GAME.modifiers.no_vouchers = false
-    
 end
 
   local start_run_ref = Game.start_run
@@ -125,15 +134,20 @@ function Game:start_run(args)
                     elseif v.id == 'no_glitter_jokers' then --removes glitter edition from jokers
                         G.GAME.modifiers.no_glitter_jokers = true
 
-                        -- BLIND SCALING
+                        -- BLINDS
 
                     elseif v.id == 'blind_scaling' then -- multiplies blind requirement by value
                         G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                    elseif v.id == 'money_scaling' then -- multiplies blind requirement by value
+                        G.GAME.modifiers.money_scaling = v.value
 
                         -- JOKER FUN
 
                     elseif v.id == 'minus_jokers_per_dollar' then -- -1 joker per value dollar
                         G.GAME.modifiers.minus_jokers_per_dollar = v.value
+                    elseif v.id == 'jokers_per_dollar' then -- +1 joker per value dollar
+                        G.GAME.modifiers.jokers_per_dollar = v.value
+
                     elseif v.id == 'overflow_perishable' then -- if jokers > joker slots, all jokers become perishable
                         G.GAME.modifiers.overflow_perishable = true
                     elseif v.id == 'overflow_debuff' then -- harsher version of last rule
@@ -146,12 +160,22 @@ function Game:start_run(args)
                     elseif v.id == 'minus_discard_per_joker' then --gain hand per joker
                         G.GAME.modifiers.minus_discard_per_joker = true
 
+                        -- STICKERS
+
                     elseif v.id == 'enable_eternal_jokers' then --these 3 just do the same thing from stakes
                         G.GAME.modifiers.enable_eternals_in_shop = true
                     elseif v.id == 'enable_perishable_jokers' then
                         G.GAME.modifiers.enable_perishables_in_shop = true
                     elseif v.id == 'enable_rental_jokers' then
                         G.GAME.modifiers.enable_rentals_in_shop = true
+
+                    elseif v.id == 'all_rental_jokers' then --every joker is rental
+                        G.GAME.modifiers.all_rental_jokers = true
+
+                    elseif v.id == 'rental_rate' then --sets rental rate
+                        G.GAME.rental_rate = v.value
+                    elseif v.id == 'perishable_rounds' then --sets perishable rounds
+                        G.GAME.perishable_rounds = v.value
                     
                         -- SHOP STUFF
 
@@ -162,6 +186,8 @@ function Game:start_run(args)
 
                     elseif v.id == 'win_ante' then --sets win ante
                         G.GAME.win_ante = v.value
+                    elseif v.id == 'extra_hand_money_scaling' then --multiplies money from extra hands by value
+                        G.GAME.modifiers.money_per_hand = (G.GAME.modifiers.money_per_hand or 1) * v.value
                     else
                     end
                     end
@@ -188,6 +214,9 @@ end
 
 local set_edition_ref = Card.set_edition
 function Card:set_edition(edition, immediate, silent)
+    if G.GAME.modifiers.all_rental_jokers == true then
+        self.ability.rental = true
+    end
     local run = true
 
     if edition then
@@ -253,6 +282,7 @@ end
 local update_ca_ref = CardArea.update
 function CardArea:update(dt)
     if self == G.hand then
+        if G.GAME.modifiers.minus_jokers_per_dollar then
         if G.GAME.modifiers.minus_jokers_per_dollar > 0 then
             self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
             if math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk then
@@ -263,6 +293,23 @@ function CardArea:update(dt)
                 end
                 self.config.last_poll_size_jk = math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
             end
+        end
+        end
+        if G.GAME.modifiers.jokers_per_dollar then
+            if G.GAME.modifiers.jokers_per_dollar > 0 then
+            self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
+            if math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) ~= self.config.last_poll_size_jk then
+                if math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
+                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots + math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar)
+                else
+                    G.jokers.config.card_limit = 0
+                end
+                self.config.last_poll_size_jk = math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar)
+                if G.jokers.config.card_limit < 0 then
+                    G.jokers.config.card_limit = 0
+                end
+            end
+        end
         end
         local overflow = #G.jokers.cards - G.jokers.config.card_limit
         if #G.jokers.cards > G.jokers.config.card_limit then
@@ -335,14 +382,29 @@ function CardArea:update(dt)
         if G.GAME.modifiers.hand_per_joker then
             local base = G.GAME.starting_params.hands
             G.GAME.round_resets.hands = base + #G.jokers.cards
+            if (SMODS.Mods.BANANA or {}).can_load then
+                G.GAME.round_resets.hands = G.GAME.round_resets.hands - G.GAME.voodooheart
+            end
         end
         if G.GAME.modifiers.minus_discard_per_joker then
             local base = G.GAME.starting_params.discards
             G.GAME.round_resets.discards = base - #G.jokers.cards
+            if (SMODS.Mods.BANANA or {}).can_load then
+                G.GAME.round_resets.discards = G.GAME.round_resets.discards - G.GAME.mirrorbroken
+            end
         end
     end
     local result = update_ca_ref(self, dt)
     
+    return result
+end
+
+local set_blind_ref = Blind.set_blind
+function Blind:set_blind(blind, reset, silent)
+    local result = set_blind_ref(self, blind, reset, silent)
+    if G.GAME.modifiers.money_scaling then
+    G.GAME.blind.dollars = math.floor(G.GAME.blind.dollars * G.GAME.modifiers.money_scaling)
+    end
     return result
 end
 
@@ -360,7 +422,8 @@ SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
-        custom = {{id = 'no_vouchers'}},
+        custom = {{id = 'money_total_scaling', value = 0.5},
+    },
         modifiers = {},
     },
     jokers = {
@@ -372,29 +435,5 @@ SMODS.Challenge{
     },
     }
 
--- example challenge
-    SMODS.Challenge{
-        loc_txt = "Three-Body Problem",
-        key = 'threebody',
-        rules = {
-            custom = {{id = 'blind_scaling', value = 1.2},
-                        {id = 'win_ante', value = 10},
-                        {id = 'hand_per_joker'},
-                        {id = 'minus_discard_per_joker'},
-                        {id = 'enable_eternal_jokers'}},
-                        
-            modifiers = {{id = 'joker_slots', value = 3},
-                        {id = 'hands', value = 0},
-                        {id = 'discards', value = 6}},
-        },
-        jokers = {
-            {id = 'j_astronomer', eternal = true}
-        },
-        restrictions = {
-            banned_cards = {},
-            banned_tags = {},
-            banned_other = {}
-        },
-        }
--------------------------------------------------
+----------------------------------------------
 ------------MOD CODE END----------------------
