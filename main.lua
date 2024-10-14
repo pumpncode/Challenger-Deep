@@ -61,6 +61,7 @@ function Back:apply_to_run()
     --STICKERS
 
     G.GAME.modifiers.all_rental_jokers = false
+    G.GAME.modifiers.rentals_keep_price = false
 
     --SHOP
 
@@ -171,6 +172,8 @@ function Game:start_run(args)
 
                     elseif v.id == 'all_rental_jokers' then --every joker is rental
                         G.GAME.modifiers.all_rental_jokers = true
+                    elseif v.id == 'rentals_keep_price' then --every joker is rental
+                        G.GAME.modifiers.rentals_keep_price = true
 
                     elseif v.id == 'rental_rate' then --sets rental rate
                         G.GAME.rental_rate = v.value
@@ -215,7 +218,7 @@ end
 local set_edition_ref = Card.set_edition
 function Card:set_edition(edition, immediate, silent)
     if G.GAME.modifiers.all_rental_jokers == true then
-        self.ability.rental = true
+        self:set_rental(true)
     end
     local run = true
 
@@ -417,12 +420,20 @@ function Blind:debuff_card(card, from_blind)
     return result
 end
 
+function Card:set_rental(_rental)
+    self.ability.rental = _rental
+    if not G.GAME.modifiers.rentals_keep_price then
+        self:set_cost()
+    end
+end
+
 -- test challenge
-SMODS.Challenge{
+--[[SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
-        custom = {{id = 'money_total_scaling', value = 0.5},
+        custom = {{id = 'rentals_keep_price'},
+                {id = 'all_rental_jokers'},
     },
         modifiers = {},
     },
@@ -434,6 +445,23 @@ SMODS.Challenge{
         banned_other = {}
     },
     }
+
+    SMODS.Challenge{
+        loc_txt = "Test II",
+        key = 'test2',
+        rules = {
+            custom = {{id = 'all_rental_jokers'},
+        },
+            modifiers = {},
+        },
+        jokers = {
+        },
+        restrictions = {
+            banned_cards = {},
+            banned_tags = {},
+            banned_other = {}
+        },
+        }]]--
 
 ----------------------------------------------
 ------------MOD CODE END----------------------

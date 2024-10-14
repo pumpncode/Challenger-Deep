@@ -43,10 +43,12 @@ return {
             ch_c_enable_rental_jokers = {"{C:attention}Jokers{} can be {C:attention}Rental"},
             ch_c_enable_perishable_jokers = {"{C:attention}Jokers{} can be {C:attention}Perishable"},
         
-            ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental {C:inactive,s:0.8}(Will retain original price)"},
+            ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental"},
             ch_c_all_perishable_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable"},
             ch_c_rental_rate = {"{C:attention}Rental Jokers{} cost {C:money}$#1#{} per round"},
             ch_c_perishable_rounds = {"{C:attention}Perishable Jokers{} are debuffed after #1# round(s)"},
+
+            ch_c_rentals_keep_price = {"{C:attention}Rental Jokers{} retain their price"},
 
             ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
             ch_c_extra_hand_money_scaling = {"Extra {C:blue}Hand{} money is multiplied by {C:red}X#1#"},
