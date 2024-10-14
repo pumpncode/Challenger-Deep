@@ -45,6 +45,7 @@ Currently supported editions: `foil`, `holo`, `polychrome`, `negative` (Jokers o
 
 - `"enable_eternal_jokers"`, `"enable_rental_jokers"`,`"enable_perishable_jokers"` - Jokers can have the specified Sticker.
 - `"all_rental_jokers"`, `"all_perishable_jokers"` - All Jokers will have the specified Sticker. (Perishable may not function currently.)
+- `"rentals_keep_price"` - Rental Jokers will retain their price.
 - `{id = "rental_rate", value = x}` - Rental Jokers will have their rate set to x dollars. At the end of a round, for each Rental Joker, x dollars will be deducted from the player.
 - `{id = "perishable_rounds", value = x}` - Perishable Jokers will be debuffed after x rounds.
 
