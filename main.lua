@@ -8,6 +8,8 @@
 ----------------------------------------------
 ------------MOD CODE ------------------------- 
 
+local testpleasework = nil 
+
 local Backapply_to_run_Ref = Back.apply_to_run
 function Back:apply_to_run()
     Backapply_to_run_Ref(self)
@@ -43,6 +45,8 @@ function Back:apply_to_run()
     G.GAME.modifiers.money_scaling = 1
     G.GAME.modifiers.money_total_scaling = 1
 
+    G.GAME.modifiers.mts_scaling = 0
+
     --JOKER FUN
 
     G.GAME.modifiers.minus_jokers_per_dollar = 0
@@ -62,10 +66,47 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.all_rental_jokers = false
     G.GAME.modifiers.rentals_keep_price = false
+    G.GAME.modifiers.rental_rate_increase = 0
+    G.GAME.modifiers.rental_rate_increase_all = 0
+
+    G.GAME.modifiers.all_perishable_jokers = false
 
     --SHOP
 
     G.GAME.modifiers.no_vouchers = false
+    G.GAME.modifiers.reroll_cost_increase = 1
+    G.GAME.modifiers.all_shop_scaling = 1
+    G.GAME.modifiers.shop_scaling_ante_increase = 0
+    G.GAME.modifiers.shop_scaling_round_increase = 0
+
+    G.GAME.chdp_spacer = false
+
+    G.GAME.challenge_id = G.GAME.challenge
+
+    G.GAME.chaos_engine = false
+    G.GAME.chaos_engine_rules = {
+        {id = 'no_foil_cards'},
+        {id = 'no_foil_jokers'},
+        {id = 'no_holo_cards'},
+        {id = 'no_holo_jokers'},
+        {id = 'no_polychrome_cards'},
+        {id = 'no_polychrome_jokers'},
+        {id = 'no_negative_jokers'},
+        {id = 'enable_eternal_jokers'},
+        {id = 'enable_rental_jokers'},
+        {id = 'enable_perishable_jokers'},
+        {id = 'blind_scaling', value = 1 + ((pseudorandom('blind_req')*2.5)-0.5)},
+        {id = 'all_shop_scaling', value = 1 + (pseudorandom('shop_scaling')*2)-0.5},
+        {id = 'win_ante', value = G.GAME.win_ante + math.ceil(pseudorandom('win_ante')*4)}
+    }
+    if (SMODS.Mods.Bunco or {}).can_load then
+        local chaos_bunc_rules = {}
+        for k, v in ipairs(chaos_bunc_rules) do
+            
+        end
+    end
+    G.GAME.chaos_rules = {}
+
 end
 
   local start_run_ref = Game.start_run
@@ -74,6 +115,7 @@ function Game:start_run(args)
     if not saveTable then
         if args.challenge then
             local _ch = args.challenge
+            G.GAME.challenge_index = args.challenge
             if _ch.rules then
                 if _ch.rules.custom then
                     for k, v in ipairs(_ch.rules.custom)do
@@ -139,8 +181,11 @@ function Game:start_run(args)
 
                     elseif v.id == 'blind_scaling' then -- multiplies blind requirement by value
                         G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
-                    elseif v.id == 'money_scaling' then -- multiplies blind requirement by value
+                    elseif v.id == 'money_scaling' then -- multiplies blind reward by value
                         G.GAME.modifiers.money_scaling = v.value
+                    elseif v.id == 'mts_scaling' then -- every ante, money total scaling = money total scaling + value
+                        G.GAME.modifiers.mts_scaling = v.value
+                        G.GAME.chdp_spacer = true
 
                         -- JOKER FUN
 
@@ -172,11 +217,20 @@ function Game:start_run(args)
 
                     elseif v.id == 'all_rental_jokers' then --every joker is rental
                         G.GAME.modifiers.all_rental_jokers = true
-                    elseif v.id == 'rentals_keep_price' then --every joker is rental
+                    elseif v.id == 'rentals_keep_price' then --rental jokers keep their purchase price
                         G.GAME.modifiers.rentals_keep_price = true
 
                     elseif v.id == 'rental_rate' then --sets rental rate
                         G.GAME.rental_rate = v.value
+                    elseif v.id == 'rental_rate_increase' then --rental rate increases by value every Boss blind
+                        G.GAME.modifiers.rental_rate_increase = v.value
+                        G.GAME.chdp_spacer = true
+                    elseif v.id == 'rental_rate_increase_all' then --rental rate increases by value EVERY blind 
+                        G.GAME.modifiers.rental_rate_increase_all = v.value
+                        G.GAME.chdp_spacer = true
+
+                    elseif v.id == 'all_perishable_jokers' then --every joker is perishable
+                        G.GAME.modifiers.all_perishable_jokers = true
                     elseif v.id == 'perishable_rounds' then --sets perishable rounds
                         G.GAME.perishable_rounds = v.value
                     
@@ -184,13 +238,49 @@ function Game:start_run(args)
 
                     elseif v.id == 'no_vouchers' then --no vouchers appear in shop (NOTE: BAN VOUCHER TAG)
                         G.GAME.modifiers.no_vouchers = true
+                    elseif v.id == 'reroll_cost_increase'then --rerolls cost value more
+                        G.GAME.modifiers.reroll_cost_increase = v.value
+                    elseif v.id == 'all_shop_scaling' then --cost of all items in shop is multiplied by value
+                        G.GAME.modifiers.all_shop_scaling = v.value
+                    elseif v.id == 'shop_scaling_ante_increase' then --shop price mult = shop price mult + value every boss blind
+                        G.GAME.modifiers.shop_scaling_ante_increase = v.value
+                    elseif v.id == 'shop_scaling_round_increase' then --shop price mult = shop price mult + value every round
+                        G.GAME.modifiers.shop_scaling_round_increase = v.value
 
+                        -- TAG
+
+                    elseif v.id == 'anaglyph' then --creates tag with name 'value'
+                        G.GAME.modifiers.anaglyph = v.tag
                         -- MISCELLANEOUS
 
                     elseif v.id == 'win_ante' then --sets win ante
                         G.GAME.win_ante = v.value
                     elseif v.id == 'extra_hand_money_scaling' then --multiplies money from extra hands by value
                         G.GAME.modifiers.money_per_hand = (G.GAME.modifiers.money_per_hand or 1) * v.value
+                    elseif v.id == 'chaos_engine' then --dear god
+                        G.GAME.modifiers.chaos_engine = true
+                        local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_engine_rules) do
+                            if chaos_number < k/#G.GAME.chaos_engine_rules then
+                                if v.id == 'enable_eternal_jokers' then
+                                    G.GAME.modifiers.enable_eternals_in_shop = true
+                                elseif v.id == 'enable_rental_jokers' then
+                                    G.GAME.modifiers.enable_rentals_in_shop = true
+                                elseif v.id == 'enable_perishable_jokers' then
+                                    G.GAME.modifiers.enable_perishables_in_shop = true
+                                elseif v.id == 'blind_scaling' then
+                                    G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                                elseif v.value then
+                                    G.GAME.modifiers[v.id] = v.value
+                                else
+                                    G.GAME.modifiers[v.id] = true
+                                end
+                                G.GAME.chaos_rules[#G.GAME.chaos_rules+1] = v
+                                table.remove(G.GAME.chaos_engine_rules, k)
+                                break
+                            end
+                        end
+                    elseif v.id == 'dummy_rule' then --NOTHING????
                     else
                     end
                     end
@@ -215,10 +305,143 @@ function get_next_voucher_key(_from_tag)
     
 end
 
+local challenge_desc_ref = G.UIDEF.challenge_description
+function G.UIDEF.challenge_description(_id, daily, is_row)
+    G.GAME.challenge_id = _id
+    return challenge_desc_ref(_id, daily, is_row)
+end
+
+local is_in_run_info_tab = false
+local run_info_ref = G.UIDEF.run_info
+function G.UIDEF.run_info()
+    is_in_run_info_tab = true
+    local result = run_info_ref()
+    is_in_run_info_tab = false
+    return result
+end
+
+local create_tabs_ref = create_tabs
+function create_tabs(args)
+if args and args["tabs"] and is_in_run_info_tab and G.GAME.challenge then
+    args.tabs[#args.tabs + 1] = {
+        label = localize('b_rules'),
+        tab_definition_function = function()
+            return {
+                n = G.UIT.ROOT,
+                config = {
+                    offset = {x=0, y=0},
+                    align = 'cm',
+                    colour = {0,0,0,0}
+                },
+                nodes = {
+                    G.UIDEF.run_rules()
+                }
+            }
+        end
+    }
+end
+return create_tabs_ref(args)
+end
+
+function G.UIDEF.run_rules()
+    local challenge = G.CHALLENGES[get_challenge_int_from_id(G.GAME.challenge)]
+    if challenge then
+    local start_rules = {}
+    local modded_starts = nil
+    local game_rules = {}
+    local starting_params = get_starting_params()
+    local base_modifiers = {
+      dollars = {value = starting_params.dollars, order = 6},
+      discards = {value = starting_params.discards, order = 2},
+      hands = {value = starting_params.hands, order = 1},
+      reroll_cost = {value = starting_params.reroll_cost, order = 7},
+      joker_slots = {value = starting_params.joker_slots, order = 4},
+      consumable_slots = {value = starting_params.consumable_slots, order = 5},
+      hand_size = {value = starting_params.hand_size, order = 3},
+  }
+  local bonus_mods = 100
+  if challenge.rules then
+    if challenge.rules.modifiers then
+      for k, v in ipairs(challenge.rules.modifiers) do
+        base_modifiers[v.id] = {value = v.value, order = base_modifiers[v.id] and base_modifiers[v.id].order or bonus_mods, custom = true, old_val = base_modifiers[v.id].value}
+        bonus_mods = bonus_mods + 1
+      end
+    end
+  end
+  local nu_base_modifiers = {}
+  for k, v in pairs(base_modifiers) do
+    v.key = k
+    nu_base_modifiers[#nu_base_modifiers+1] = v
+  end
+  table.sort(nu_base_modifiers, function(a,b) return a.order < b.order end)
+  for k, v in ipairs(nu_base_modifiers) do
+    if v.old_val then
+      modded_starts = modded_starts or {}
+      modded_starts[#modded_starts+1] = {n=G.UIT.R, config={align = "cl", maxw = 3.5}, nodes= localize{type = 'text', key = 'ch_m_'..v.key, vars = {v.value}, default_col = G.C.L_BLACK}}
+    
+    else
+      start_rules[#start_rules+1] = {n=G.UIT.R, config={align = "cl", maxw =3.5}, nodes= localize{type = 'text', key = 'ch_m_'..v.key, vars = {v.value}, default_col = not v.custom and G.C.UI.TEXT_INACTIVE or nil}}
+    end
+  end
+
+  if modded_starts then
+    start_rules = {
+      modded_starts and {n=G.UIT.R, config={align = "cl", padding = 0.05}, nodes=modded_starts} or nil,
+      {n=G.UIT.R, config={align = "cl", padding = 0.05, colour = G.C.GREY}, nodes={}},
+      {n=G.UIT.R, config={align = "cl", padding = 0.05}, nodes=start_rules},
+    }
+  end
+
+    if challenge.rules then
+      if challenge.rules.custom then
+        for k, v in ipairs(challenge.rules.custom) do
+          game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {v.value}}}
+        end  
+      end
+      if G.GAME.chaos_rules then
+        for k, v in ipairs(G.GAME.chaos_rules) do
+            if v.value then
+                game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {v.value}}}
+            else
+                game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {}}}
+            end
+        end
+      end
+    end
+    if (not start_rules[1]) and (not modded_starts) then  start_rules[#start_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_m_none', vars = {}}} end
+    if not game_rules[1] then  game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_none', vars = {}}} end
+
+    local starting_rule_list = {n=G.UIT.C, config={align = "cm", minw = 3, r = 0.1, colour = G.C.BLUE}, nodes={
+      {n=G.UIT.R, config={align = "cm", padding = 0.08, minh = 0.6}, nodes={
+        {n=G.UIT.T, config={text = localize('k_game_modifiers'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+      }},
+      {n=G.UIT.R, config={align = "cm", minh = 4.1, minw = 4.2, padding = 0.05, r = 0.1, colour = G.C.WHITE}, nodes= start_rules}
+    }}
+
+    local override_rule_list = {n=G.UIT.C, config={align = "cm", minw = 3, r = 0.1, colour = G.C.BLUE}, nodes={
+      {n=G.UIT.R, config={align = "cm", padding = 0.08, minh = 0.6}, nodes={
+        {n=G.UIT.T, config={text = localize('k_custom_rules'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+      }},
+      {n=G.UIT.R, config={align = "cm", minh = 4.1, minw = 6.8, maxw = 6.7, padding = 0.05, r = 0.1, colour = G.C.WHITE}, nodes= game_rules}
+    }}
+
+    return {n=G.UIT.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, nodes={
+      {n=G.UIT.C, config={align = "cm", padding = 0.1, colour = G.C.L_BLACK, r = 0.1, minw = 3}, nodes={
+        override_rule_list,starting_rule_list
+      }}
+    }}
+    end
+end
+
 local set_edition_ref = Card.set_edition
 function Card:set_edition(edition, immediate, silent)
-    if G.GAME.modifiers.all_rental_jokers == true then
-        self:set_rental(true)
+    if self.ability.set == "Joker" then
+        if G.GAME.modifiers.all_rental_jokers == true then
+            self:set_rental(true)
+        end
+        if G.GAME.modifiers.all_perishable_jokers == true then
+            self:set_perishable(true)
+        end
     end
     local run = true
 
@@ -428,14 +651,15 @@ function Card:set_rental(_rental)
 end
 
 -- test challenge
---[[SMODS.Challenge{
+SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
-        custom = {{id = 'rentals_keep_price'},
-                {id = 'all_rental_jokers'},
+        custom = {
+            {id = 'chaos_engine'}
     },
-        modifiers = {},
+        modifiers = {
+        },
     },
     jokers = {
     },
@@ -445,23 +669,5 @@ end
         banned_other = {}
     },
     }
-
-    SMODS.Challenge{
-        loc_txt = "Test II",
-        key = 'test2',
-        rules = {
-            custom = {{id = 'all_rental_jokers'},
-        },
-            modifiers = {},
-        },
-        jokers = {
-        },
-        restrictions = {
-            banned_cards = {},
-            banned_tags = {},
-            banned_other = {}
-        },
-        }]]--
-
 ----------------------------------------------
 ------------MOD CODE END----------------------

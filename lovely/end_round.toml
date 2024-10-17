@@ -1,0 +1,77 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# big patch moment
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = "G.GAME.unused_discards = (G.GAME.unused_discards or 0) + G.GAME.current_round.discards_left"
+position = "before"
+match_indent = true
+payload = '''
+if G.GAME.modifiers.mts_scaling ~= 0 then
+    if G.GAME.blind:get_type() == 'Boss' then
+        G.GAME.modifiers.money_total_scaling = G.GAME.modifiers.money_total_scaling + G.GAME.modifiers.mts_scaling
+    end
+end
+if G.GAME.blind:get_type() == 'Boss' then
+    G.GAME.from_boss_blind = true
+else
+    G.GAME.from_boss_blind = false
+end
+if G.GAME.modifiers.rental_rate_increase_all ~= 0 then
+    if not G.GAME.real_rental_rate then 
+        G.GAME.real_rental_rate = G.GAME.rental_rate
+    end
+    G.GAME.real_rental_rate = G.GAME.real_rental_rate + G.GAME.modifiers.rental_rate_increase_all
+    if G.GAME.real_rental_rate % 1 < 0.5 then
+        G.GAME.rental_rate = math.floor(G.GAME.real_rental_rate)
+    else
+        G.GAME.rental_rate = math.ceil(G.GAME.real_rental_rate)
+    end
+end
+if G.GAME.modifiers.rental_rate_increase ~= 0 then
+    if not G.GAME.real_rental_rate then G.GAME.real_rental_rate = G.GAME.rental_rate end
+    G.GAME.real_rental_rate = G.GAME.real_rental_rate + G.GAME.modifiers.rental_rate_increase
+    if G.GAME.real_rental_rate % 1 < 0.5 then
+        G.GAME.rental_rate = math.floor(G.GAME.real_rental_rate)
+    else
+        G.GAME.rental_rate = math.ceil(G.GAME.real_rental_rate)
+    end
+end
+if G.GAME.modifiers.shop_scaling_ante_increase ~= 0 and G.GAME.blind:get_type() == 'Boss' then
+    G.GAME.modifiers.all_shop_scaling = G.GAME.modifiers.all_shop_scaling + G.GAME.modifiers.shop_scaling_ante_increase
+end
+if G.GAME.modifiers.shop_scaling_round_increase ~= 0 then
+    G.GAME.modifiers.all_shop_scaling = G.GAME.modifiers.all_shop_scaling + G.GAME.modifiers.shop_scaling_round_increase
+end
+if G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind == true then
+    local challenge = G.GAME.challenge_index
+    local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_engine_rules) do
+                            if chaos_number < k/#G.GAME.chaos_engine_rules then
+                                if v.id == 'enable_eternal_jokers' then
+                                    G.GAME.modifiers.enable_eternals_in_shop = true
+                                elseif v.id == 'enable_rental_jokers' then
+                                    G.GAME.modifiers.enable_rentals_in_shop = true
+                                elseif v.id == 'enable_perishable_jokers' then
+                                    G.GAME.modifiers.enable_perishables_in_shop = true
+                                elseif v.id == 'blind_scaling' then
+                                    G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                                elseif v.value then
+                                    G.GAME.modifiers[v.id] = v.value
+                                else
+                                    G.GAME.modifiers[v.id] = true
+                                end
+                                G.GAME.chaos_rules[#G.GAME.chaos_rules+1] = v
+                                table.remove(G.GAME.chaos_engine_rules, k)
+                                break
+                            end
+                        end
+end
+if G.GAME.modifiers.anaglyph and G.GAME.from_boss_blind == true then
+    add_tag(Tag('tag_'..G.GAME.modifiers.anaglyph))
+end
+'''

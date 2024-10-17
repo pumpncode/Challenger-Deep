@@ -1,5 +1,8 @@
 return {
     misc = {
+        dictionary = {
+            b_rules = 'Rules'
+        },
         v_text = {
             ch_c_no_editions = {"Cards with {C:attention}Editions{} will no longer appear"},
             ch_c_no_edition_cards = {"{C:attention}Playing cards{} can no longer have {C:attention}Editions"},
@@ -45,7 +48,11 @@ return {
         
             ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental"},
             ch_c_all_perishable_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable"},
+
             ch_c_rental_rate = {"{C:attention}Rental Jokers{} cost {C:money}$#1#{} per round"},
+            ch_c_rental_rate_increase = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} per ante"},
+            ch_c_rental_rate_increase_all = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} every round"}, --I AM THE BALATRO LANDLORD
+
             ch_c_perishable_rounds = {"{C:attention}Perishable Jokers{} are debuffed after #1# round(s)"},
 
             ch_c_rentals_keep_price = {"{C:attention}Rental Jokers{} retain their price"},
@@ -53,8 +60,17 @@ return {
             ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
             ch_c_extra_hand_money_scaling = {"Extra {C:blue}Hand{} money is multiplied by {C:red}X#1#"},
             ch_c_money_total_scaling = {"{C:money}Money{} at Cash Out multiplied by {C:red}X#1#{}"},
+            ch_c_mts_scaling = {"{C:red}#1#x{} added to Cash Out multiplier every Ante"},
 
-            ch_c_no_vouchers = {"No {C:attention}vouchers{} will appear in the shop"}
+            ch_c_no_vouchers = {"No {C:attention}vouchers{} will appear in the shop"},
+            ch_c_reroll_cost_increase = {"Successive {C:green}Rerolls{} cost +{C:money}$#1#{} more each"},
+            ch_c_all_shop_scaling = {"The price of all {C:green}Shop{} items is multiplied by {C:red}X#1#"},
+            ch_c_shop_scaling_ante_increase = {"Shop price multiplier increases by {C:red}X#1#{} per ante"},
+            ch_c_shop_scaling_round_increase = {"Shop price multiplier increases by {C:red}X#1#{} every round"},
+
+            ch_c_chaos_engine = {"{C:red}Chaos {C:inactive,S=0.5}(Enables a random Rule every Ante)"},
+            ch_c_anaglyph = {'Creates a {C:attention}#1#{} when Boss Blind is defeated'},
+            ch_c_dummy_rule = {"Dummy rule"}
         }
     }
 }

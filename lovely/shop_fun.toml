@@ -1,0 +1,30 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# rerolls
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = "if not skip_increment then G.GAME.current_round.reroll_cost_increase = G.GAME.current_round.reroll_cost_increase + 1 end"
+position = "at"
+match_indent = true
+payload = 'if not skip_increment then G.GAME.current_round.reroll_cost_increase = G.GAME.current_round.reroll_cost_increase + (G.GAME.modifiers.reroll_cost_increase or 1) end'
+
+# multiplier everything now!!!
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = "self.sell_cost = math.max(1, math.floor(self.cost/2)) + (self.ability.extra_value or 0)"
+position = "after"
+match_indent = true
+payload = '''
+if not G.GAME.modifiers.all_shop_scaling then G.GAME.modifiers.all_shop_scaling = 1 end
+if G.GAME.modifiers.all_shop_scaling ~= 1 then
+    if (self.cost*G.GAME.modifiers.all_shop_scaling) % 1 < 0.5 then
+        self.cost = math.floor(self.cost*G.GAME.modifiers.all_shop_scaling)
+    else
+        self.cost = math.ceil(self.cost*G.GAME.modifiers.all_shop_scaling)
+    end
+end'''
