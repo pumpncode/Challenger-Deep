@@ -17,7 +17,11 @@ For rules with a value variable, the whole item will be typed out, such as `{id 
 
 #### Specific Editions
 
-Currently supported editions: `foil`, `holo`, `polychrome`, `negative` (Jokers only), `fluorescent` (Bunco), `glitter` (Bunco)
+Supported editions are as follows:
+Base editions: `foil`, `holo`, `polychrome`, `negative` (Jokers only)
+Bunco editions: `fluorescent`, `glitter`
+Cryptid editions: `mosaic`, `glitched`, `oversat`, `gold`, `glass`, `blur`, `astral`, `m`
+
 - `"no_(EDITION)s"` - Removes (EDITION) from every card.
 - `"no_(EDITION)_jokers` - Removes (EDITION) from jokers.
 - `"no_(EDITION)_cards"` - Removes (EDITION) from Playing Cards.
@@ -44,20 +48,50 @@ Currently supported editions: `foil`, `holo`, `polychrome`, `negative` (Jokers o
 #### Stickers
 
 - `"enable_eternal_jokers"`, `"enable_rental_jokers"`,`"enable_perishable_jokers"` - Jokers can have the specified Sticker.
-- `"all_rental_jokers"`, `"all_perishable_jokers"` - All Jokers will have the specified Sticker. (Perishable may not function currently.)
+- `"all_rental_jokers"`, `"all_perishable_jokers"` - All Jokers will have the specified Sticker.
 - `"rentals_keep_price"` - Rental Jokers will retain their price.
 - `{id = "rental_rate", value = x}` - Rental Jokers will have their rate set to x dollars. At the end of a round, for each Rental Joker, x dollars will be deducted from the player.
+- `{id = "rental_rate_increase", value = x}` - Rental rate increases by x every Ante.
+- `{id = "rental_rate_increase_all", value = x}` - Rental rate increases by x every round.
 - `{id = "perishable_rounds", value = x}` - Perishable Jokers will be debuffed after x rounds.
 
 ### Shop
 
-- `"no_vouchers"` - Vouchers do not appear. (NOTE: Voucher Tag crashes the game when this is enabled.)
+- `{id = "reroll_cost_increase", value = x}` - Successive rerolls cost $x more each (e.g. when this is 1 (the default value), reroll 1 costs $5, reroll 2 costs $6 etc)
+- `"no_vouchers"` - Vouchers do not appear.
+
+- `{id = "all_shop_scaling", value = x}` - The price of every item in the shop is multiplied by x
+- `{id = "shop_scaling_round_increase", value = x}` - `all_shop_scaling` increases by x every round
+- `{id = "shop_scaling_ante_increase", value = x}` - `all_shop_scaling` increases by x every Ante
+
+### Chaos Engine
+
+- `"chaos_engine"` - Enables a random Rule every Ante.
+- `"chaos_engine_all"` - Enables a random Rule every Round.
+
+#### Chaos Rules
+At the beginning of a Chaos Engine run, the following rules are possible:
+
+- `no_vouchers`
+- `enable_eternal_jokers` (or `all_eternal` if this rule has been used)
+- `enable_rental_jokers` (or `all_rental_jokers` and `rental_rate` if this rule has been used)
+- `enable_perishable_jokers` (or `all_perishable_jokers` and `perishable_rounds` if this rule has been used)
+- `{id = 'win_ante'}` (Value is set to a random integer between 6 and 12.)
+- `{id = 'blind_scaling'}` (Value is set to a random number between 0.5 and 4.)
+- `{id = 'all_shop_scaling'}` (Value is set to a random number between 0.75 and 2.75.)
+- `{id = 'money_total_scaling'}` (Value is set to a random number between 0.25 and 1.25, rounded to the nearest 0.01.)
+- At any given time, the Chaos Engine will have an `anaglyph` rule, set to a random Tag (including Bunco and Cryptid tags, if enabled)
+- At any given time, the Chaos Engine has one `no_(EDITION)s`, one `no_(EDITION)_cards` and one `no_(EDITION)_jokers` rule
 
 ### Miscellaneous Rules
 
 - `{id = "win_ante", value = x}` - The player wins the game at Ante x instead of Ante 8.
 - `{id = "extra_hand_money_scaling", value = x}` - Money from extra Hands at the end of a round will be multiplied by x, rounded down (i.e. $1.9 becomes $1 flat)
+
 - `{id = "money_total_scaling", value = x}` - Total money accumulated at the end of a round is multiplied by x, rounded to nearest dollar.
+- `{id = "mts_scaling", value = x}` - The money multiplier `money_total_scaling` has x added to it every Ante.
+
+- - `{id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_x', nodes = {}}, tag = 'x'}` - Creates a Tag with the key `tag_x` every round.
 
 ## Example Challenges
 
