@@ -47,17 +47,22 @@ end
 if G.GAME.modifiers.shop_scaling_round_increase ~= 0 then
     G.GAME.modifiers.all_shop_scaling = G.GAME.modifiers.all_shop_scaling + G.GAME.modifiers.shop_scaling_round_increase
 end
-if G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind == true then
+if (G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind == true) then
     local challenge = G.GAME.challenge_index
     local chaos_number = pseudorandom('chaos_engine')
                         for k, v in ipairs(G.GAME.chaos_engine_rules) do
                             if chaos_number < k/#G.GAME.chaos_engine_rules then
                                 if v.id == 'enable_eternal_jokers' then
                                     G.GAME.modifiers.enable_eternals_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1].id = 'all_eternal'
                                 elseif v.id == 'enable_rental_jokers' then
                                     G.GAME.modifiers.enable_rentals_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1].id = 'all_rental_jokers'
                                 elseif v.id == 'enable_perishable_jokers' then
                                     G.GAME.modifiers.enable_perishables_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1].id = 'all_perishable_jokers'
+                                elseif v.id == 'win_ante' then
+                                    G.GAME.win_ante = v.value
                                 elseif v.id == 'blind_scaling' then
                                     G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
                                 elseif v.value then
@@ -71,7 +76,97 @@ if G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind == true then
                             end
                         end
 end
-if G.GAME.modifiers.anaglyph and G.GAME.from_boss_blind == true then
-    add_tag(Tag('tag_'..G.GAME.modifiers.anaglyph))
+if G.GAME.modifiers.chaos_engine_all then
+    local challenge = G.GAME.challenge_index
+    local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_engine_rules) do
+                            if chaos_number < k/#G.GAME.chaos_engine_rules then
+                                if v.id == 'enable_eternal_jokers' then
+                                    G.GAME.modifiers.enable_eternals_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_eternal'}
+                                elseif v.id == 'all_eternal' then
+                                    G.GAME.modifiers.all_eternal = true
+                                    for kk, vv in ipairs(G.jokers.cards) do
+                                        vv:set_eternal(true)
+                                    end
+                                elseif v.id == 'enable_rental_jokers' then
+                                    G.GAME.modifiers.enable_rentals_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_rental_jokers'}
+                                    local rnd_num = pseudorandom('rule')
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'rental_rate', value = math.ceil(2 + rnd_num*4)}
+                                elseif v.id == 'all_rental_jokers' then    
+                                    G.GAME.modifiers.all_rental_jokers = true
+                                    for kk, vv in ipairs(G.jokers.cards) do
+                                        vv:set_rental(true)
+                                    end
+                                elseif v.id == 'enable_perishable_jokers' then
+                                    G.GAME.modifiers.enable_perishables_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_perishable_jokers'}
+                                elseif v.id == 'all_perishable_jokers' then
+                                    G.GAME.modifiers.all_perishable_jokers = true
+                                    for kk, vv in ipairs(G.jokers.cards) do
+                                        vv:set_perishable(true)
+                                    end
+                                elseif v.id == 'win_ante' then
+                                    G.GAME.win_ante = v.value
+                                elseif v.id == 'no_vouchers' then
+                                    G.GAME.modifiers.no_vouchers = true
+                                    G.GAME.current_round.voucher = nil
+                                    G.GAME.banned_keys['tag_voucher'] = true
+                                    for kk, vv in ipairs(G.GAME.chaos_tags) do
+                                        if vv == 'voucher' or vv == 'cry_better_voucher' then
+                                            table.remove(G.GAME.chaos_tags, kk)
+                                        end
+                                    end
+                                elseif v.id == 'anaglyph' then
+                                    G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
+                                elseif v.id == 'blind_scaling' then
+                                    G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                                elseif v.value then
+                                    G.GAME.modifiers[v.id] = v.value
+                                else
+                                    G.GAME.modifiers[v.id] = true
+                                end
+                                G.GAME.chaos_rules[#G.GAME.chaos_rules+1] = v
+                                if v.id ~= 'anaglyph' or not v.edition_type then
+                                    table.remove(G.GAME.chaos_engine_rules, k)
+                                elseif v.edition_type then
+                                    if v.edition_type == 'cards' then
+                                        local chaos_number = pseudorandom('chaos_engine')
+                                        for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random playing card edition to add as a ban
+                                            if chaos_number < kk/#G.GAME.chaos_editions then
+                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_cards', edition_type = 'cards'}
+                                                break
+                                            end
+                                        end
+                                    elseif v.edition_type == 'jokers' then
+                                        local chaos_number = pseudorandom('chaos_engine')
+                                        for kk, vv in ipairs(G.GAME.chaos_editions_jokers) do --choose a random joker edition to add as a ban
+                                            if chaos_number < kk/#G.GAME.chaos_editions_jokers then
+                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_jokers', edition_type = 'jokers'}
+                                                break
+                                            end
+                                        end
+                                    else
+                                        local chaos_number = pseudorandom('chaos_engine')
+                                        for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
+                                            if chaos_number < kk/#G.GAME.chaos_editions then
+                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'s', edition_type = 'all'}
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                                break
+                            end
+                        end
+end
+if #G.GAME.modifiers.anaglyph > 0 and G.GAME.from_boss_blind == true then
+    for k, v in ipairs(G.GAME.modifiers.anaglyph) do
+        add_tag(Tag('tag_'..(v)))
+    end
+end
+if G.GAME.modifiers.no_vouchers then
+    G.GAME.current_round.voucher = nil
 end
 '''

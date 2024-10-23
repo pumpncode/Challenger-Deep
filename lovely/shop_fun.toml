@@ -12,6 +12,33 @@ position = "at"
 match_indent = true
 payload = 'if not skip_increment then G.GAME.current_round.reroll_cost_increase = G.GAME.current_round.reroll_cost_increase + (G.GAME.modifiers.reroll_cost_increase or 1) end'
 
+# no vouchers for you
+[[patches]]
+[patches.pattern]
+target = "tag.lua"
+pattern = "if self.name == 'Voucher Tag' then"
+position = "after"
+match_indent = true
+payload = '''
+    if not G.GAME.modifiers.no_vouchers then
+'''
+
+[[patches]]
+[patches.pattern]
+target = "tag.lua"
+pattern = "elseif _context.type == 'tag_add' then"
+position = "before"
+match_indent = true
+payload = '''
+    else
+        self:yep('+', G.C.RED,function() 
+            play_sound('tarot2', 0.76, 0.4)
+            play_sound('tarot2', 1, 0.4)
+            return true
+        end)
+    end
+'''
+
 # multiplier everything now!!!
 [[patches]]
 [patches.pattern]
@@ -28,3 +55,20 @@ if G.GAME.modifiers.all_shop_scaling ~= 1 then
         self.cost = math.ceil(self.cost*G.GAME.modifiers.all_shop_scaling)
     end
 end'''
+
+# I DONT LIKE VOUCHERS
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "local card = Card(G.shop_vouchers.T.x + G.shop_vouchers.T.w/2,"
+position = "before"
+match_indent = true
+payload = 'if not G.GAME.modifiers.no_vouchers then'
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "G.shop_vouchers:emplace(card)"
+position = "after"
+match_indent = true
+payload = 'end'

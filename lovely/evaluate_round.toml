@@ -87,7 +87,8 @@ if G.GAME.chdp_spacer_loaded == false then
         G.round_eval:add_child(spacer, G.round_eval:get_UIE_by_ID(config.bonus and 'bonus_round_eval' or 'base_round_eval'))
     G.GAME.chdp_spacer_loaded = true
 end
-    table.insert(left_text, {n=G.UIT.O, config={object = DynaText({string = {localize("ch_c_"..(G.GAME.chaos_rules[#G.GAME.chaos_rules].id))}, colours = {G.C.WHITE}, shadow = true, pop_in = 0, scale = 0.4*scale, silent = true})}})    
+    local new_rule = G.GAME.chaos_rules[#G.GAME.chaos_rules]
+    table.insert(left_text, {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..new_rule.id, vars = {new_rule.value}}})    
 '''
 
 # evaluate_round()
@@ -136,7 +137,10 @@ end
 if G.GAME.modifiers.mts_scaling ~= 0 and G.GAME.from_boss_blind then
     add_round_eval_row({dollars = 0, name = 'mts_scaling', bonus = true, pitch = pitch})
 end
-if G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind then
+if (G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind) then
+    add_round_eval_row({dollars = 0, name = 'chaos_engine', bonus = true, pitch = pitch})
+end
+if G.GAME.modifiers.chaos_engine_all then
     add_round_eval_row({dollars = 0, name = 'chaos_engine', bonus = true, pitch = pitch})
 end
 '''

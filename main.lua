@@ -8,8 +8,6 @@
 ----------------------------------------------
 ------------MOD CODE ------------------------- 
 
-local testpleasework = nil 
-
 local Backapply_to_run_Ref = Back.apply_to_run
 function Back:apply_to_run()
     Backapply_to_run_Ref(self)
@@ -39,6 +37,32 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.no_glitter_cards = false --no glitter cards 
     G.GAME.modifiers.no_glitter_jokers = false --no glitter jokers
+
+    --CRYPTID EDITIONS
+
+    G.GAME.modifiers.no_mosaic_cards = false
+    G.GAME.modifiers.no_mosaic_jokers = false
+
+    G.GAME.modifiers.no_glitched_cards = false
+    G.GAME.modifiers.no_glitched_jokers = false
+
+    G.GAME.modifiers.no_oversat_cards = false
+    G.GAME.modifiers.no_oversat_jokers = false
+
+    G.GAME.modifiers.no_gold_cards = false
+    G.GAME.modifiers.no_gold_jokers = false
+
+    G.GAME.modifiers.no_glass_cards = false
+    G.GAME.modifiers.no_glass_jokers = false
+
+    G.GAME.modifiers.no_blur_cards = false
+    G.GAME.modifiers.no_blur_jokers = false
+
+    G.GAME.modifiers.no_astral_cards = false
+    G.GAME.modifiers.no_astral_jokers = false
+
+    G.GAME.modifiers.no_m_cards = false
+    G.GAME.modifiers.no_m_jokers = false
 
     --BLINDS
 
@@ -79,12 +103,44 @@ function Back:apply_to_run()
     G.GAME.modifiers.shop_scaling_ante_increase = 0
     G.GAME.modifiers.shop_scaling_round_increase = 0
 
+    G.GAME.modifiers.anaglyph = {}
+
     G.GAME.chdp_spacer = false
 
     G.GAME.challenge_id = G.GAME.challenge
 
     G.GAME.chaos_engine = false
+    G.GAME.chaos_tags = {
+        'uncommon',
+        'rare',
+        'negative',
+        'foil',
+        'holo',
+        'polychrome',
+        'investment',
+        'voucher',
+        'boss',
+        'standard',
+        'charm',
+        'meteor',
+        'buffoon',
+        'handy',
+        'garbage',
+        'coupon',
+        'juggle',
+        'd_six',
+        'top_up',
+        'skip',
+        'economy',
+        'ethereal'
+    }
+    G.GAME.chaos_editions = {
+        'foil',
+        'holo',
+        'polychrome'
+    }
     G.GAME.chaos_engine_rules = {
+        {id = 'no_vouchers'},
         {id = 'no_foil_cards'},
         {id = 'no_foil_jokers'},
         {id = 'no_holo_cards'},
@@ -94,17 +150,92 @@ function Back:apply_to_run()
         {id = 'no_negative_jokers'},
         {id = 'enable_eternal_jokers'},
         {id = 'enable_rental_jokers'},
-        {id = 'enable_perishable_jokers'},
-        {id = 'blind_scaling', value = 1 + ((pseudorandom('blind_req')*2.5)-0.5)},
-        {id = 'all_shop_scaling', value = 1 + (pseudorandom('shop_scaling')*2)-0.5},
-        {id = 'win_ante', value = G.GAME.win_ante + math.ceil(pseudorandom('win_ante')*4)}
+        {id = 'enable_perishable_jokers'}
     }
-    if (SMODS.Mods.Bunco or {}).can_load then
-        local chaos_bunc_rules = {}
+
+    if (SMODS.Mods.Bunco or {}).can_load then --add this stuff
+        local chaos_bunc_tags = {
+            'bunc_breaking',
+            'bunc_eternal',
+            'bunc_perishable',
+            'bunc_scattering',
+            'bunc_hindered',
+            'bunc_reactive',
+            'bunc_rental',
+            'bunc_arcade',
+            'bunc_glitter',
+            'bunc_fluorescent',
+            'bunc_filigree',
+        }
+        for k, v in ipairs(chaos_bunc_tags) do
+            G.GAME.chaos_tags[#G.GAME.chaos_tags+1] = v
+        end
+        local chaos_bunc_rules = {
+            'fluorescent',
+            'glitter'
+        }
         for k, v in ipairs(chaos_bunc_rules) do
-            
+            G.GAME.chaos_editions[#G.GAME.chaos_editions+1] = v
         end
     end
+
+
+    if (SMODS.Mods.Cryptid or {}).can_load then
+        local cryptid_config = SMODS.load_mod_config({id = "Cryptid", path = SMODS.Mods.Cryptid.path}) -- cryptid config
+        if cryptid_config["Tags"] then
+            local chaos_cry_tags = {
+                'cry_cat',
+                'cry_schematic',
+                'cry_gambler',
+                'cry_empowered',
+                'cry_bundle',
+                'cry_banana',
+                'cry_scope',
+                'cry_gourmand',
+                'cry_bettertop_up',
+                'cry_booster'
+            }
+            if cryptid_config["Epic Jokers"] then
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_epic'
+            end
+            if cryptid_config["Vouchers"] then
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_better_voucher'
+            end
+            if cryptid_config["Misc."] then
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_glitched'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_oversat'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_mosaic'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_gold'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_glass'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_blur'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_astral'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_loss'
+                if cryptid_config["M Jokers"] then
+                    chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_m'
+                end
+            end
+            for k, v in ipairs(chaos_cry_tags) do
+                G.GAME.chaos_tags[#G.GAME.chaos_tags+1] = v
+            end
+        end
+        if cryptid_config["Misc."] then
+            local chaos_cry_rules = {
+                'mosaic',
+                'glitched',
+                'oversat',
+                'gold',
+                'glass',
+                'blur',
+                'astral',
+                'm',
+            }
+            for k, v in ipairs(chaos_cry_rules) do
+                G.GAME.chaos_editions[#G.GAME.chaos_editions+1] = v
+            end
+        end
+    end
+    G.GAME.chaos_editions_jokers = G.GAME.chaos_editions
+    G.GAME.chaos_editions_jokers[#G.GAME.chaos_editions_jokers+1] = 'negative'
     G.GAME.chaos_rules = {}
 
 end
@@ -176,6 +307,72 @@ function Game:start_run(args)
                         G.GAME.modifiers.no_glitter_cards = true
                     elseif v.id == 'no_glitter_jokers' then --removes glitter edition from jokers
                         G.GAME.modifiers.no_glitter_jokers = true
+                    
+                        -- EDITIONS - CRYPTID
+
+                    elseif v.id == 'no_mosaics' then --removes mosaic edition from all cards
+                        G.GAME.modifiers.no_mosaic_cards = true
+                        G.GAME.modifiers.no_mosaic_jokers = true
+                    elseif v.id == 'no_mosaic_cards' then --removes mosaic edition from playing cards
+                        G.GAME.modifiers.no_mosaic_cards = true
+
+                    elseif v.id == 'no_mosaic_jokers' then --removes mosaic edition from jokers
+                        G.GAME.modifiers.no_mosaic_jokers = true
+                    elseif v.id == 'no_glitcheds' then --removes glitched edition from all cards
+                        G.GAME.modifiers.no_glitched_cards = true
+                        G.GAME.modifiers.no_glitched_jokers = true
+                    elseif v.id == 'no_glitched_cards' then --removes glitched edition from playing cards
+                        G.GAME.modifiers.no_glitched_cards = true
+                    elseif v.id == 'no_glitched_jokers' then --removes glitched edition from jokers
+                        G.GAME.modifiers.no_glitched_jokers = true
+
+                    elseif v.id == 'no_oversats' then --removes oversat edition from all cards
+                        G.GAME.modifiers.no_oversat_cards = true
+                        G.GAME.modifiers.no_oversat_jokers = true
+                    elseif v.id == 'no_oversat_cards' then --removes oversat edition from playing cards
+                        G.GAME.modifiers.no_oversat_cards = true
+                    elseif v.id == 'no_oversat_jokers' then --removes oversat edition from jokers
+                        G.GAME.modifiers.no_oversat_jokers = true
+
+                    elseif v.id == 'no_golds' then --removes gold edition from all cards
+                        G.GAME.modifiers.no_gold_cards = true
+                        G.GAME.modifiers.no_gold_jokers = true
+                    elseif v.id == 'no_gold_cards' then --removes gold edition from playing cards
+                        G.GAME.modifiers.no_gold_cards = true
+                    elseif v.id == 'no_gold_jokers' then --removes gold edition from jokers
+                        G.GAME.modifiers.no_gold_jokers = true
+
+                    elseif v.id == 'no_glasss' then --removes glass edition from all cards (i know it looks goofy)
+                        G.GAME.modifiers.no_glass_cards = true
+                        G.GAME.modifiers.no_glass_jokers = true
+                    elseif v.id == 'no_glass_cards' then --removes glass edition from playing cards
+                        G.GAME.modifiers.no_glass_cards = true
+                    elseif v.id == 'no_glass_jokers' then --removes glass edition from jokers
+                        G.GAME.modifiers.no_glass_jokers = true
+
+                    elseif v.id == 'no_blurs' then --removes blur edition from all cards
+                        G.GAME.modifiers.no_blur_cards = true
+                        G.GAME.modifiers.no_blur_jokers = true
+                    elseif v.id == 'no_blur_cards' then --removes blur edition from playing cards
+                        G.GAME.modifiers.no_blur_cards = true
+                    elseif v.id == 'no_blur_jokers' then --removes blur edition from jokers
+                        G.GAME.modifiers.no_blur_jokers = true
+                    
+                    elseif v.id == 'no_astrals' then --removes astral edition from all cards
+                        G.GAME.modifiers.no_astral_cards = true
+                        G.GAME.modifiers.no_astral_jokers = true
+                    elseif v.id == 'no_astral_cards' then --removes astral edition from playing cards
+                        G.GAME.modifiers.no_astral_cards = true
+                    elseif v.id == 'no_astral_jokers' then --removes astral edition from jokers
+                        G.GAME.modifiers.no_astral_jokers = true
+                    
+                    elseif v.id == 'no_ms' then --removes m edition from all cards
+                        G.GAME.modifiers.no_m_cards = true
+                        G.GAME.modifiers.no_m_jokers = true
+                    elseif v.id == 'no_m_cards' then --removes m edition from playing cards
+                        G.GAME.modifiers.no_m_cards = true
+                    elseif v.id == 'no_m_jokers' then --removes m edition from jokers
+                        G.GAME.modifiers.no_m_jokers = true
 
                         -- BLINDS
 
@@ -183,6 +380,8 @@ function Game:start_run(args)
                         G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
                     elseif v.id == 'money_scaling' then -- multiplies blind reward by value
                         G.GAME.modifiers.money_scaling = v.value
+                    elseif v.id == 'money_total_scaling' then -- multiplies all money in blind by value
+                        G.GAME.modifiers.money_total_scaling = v.value
                     elseif v.id == 'mts_scaling' then -- every ante, money total scaling = money total scaling + value
                         G.GAME.modifiers.mts_scaling = v.value
                         G.GAME.chdp_spacer = true
@@ -217,6 +416,10 @@ function Game:start_run(args)
 
                     elseif v.id == 'all_rental_jokers' then --every joker is rental
                         G.GAME.modifiers.all_rental_jokers = true
+                        if v.ignore_start == true then
+                            G.GAME.modifiers.all_rental_ignore_first = true
+                        end
+                    
                     elseif v.id == 'rentals_keep_price' then --rental jokers keep their purchase price
                         G.GAME.modifiers.rentals_keep_price = true
 
@@ -250,24 +453,109 @@ function Game:start_run(args)
                         -- TAG
 
                     elseif v.id == 'anaglyph' then --creates tag with name 'value'
-                        G.GAME.modifiers.anaglyph = v.tag
+                        G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
                         -- MISCELLANEOUS
 
                     elseif v.id == 'win_ante' then --sets win ante
                         G.GAME.win_ante = v.value
                     elseif v.id == 'extra_hand_money_scaling' then --multiplies money from extra hands by value
                         G.GAME.modifiers.money_per_hand = (G.GAME.modifiers.money_per_hand or 1) * v.value
-                    elseif v.id == 'chaos_engine' then --dear god
-                        G.GAME.modifiers.chaos_engine = true
+                    elseif v.id == 'chaos_engine' or v.id == 'chaos_engine_all' or v.id == 'world_machine' then --dear god
+                        G.GAME.modifiers[v.id] = true
+                        if G.GAME.modifiers.world_machine == true then
+                            G.GAME.modifiers.chaos_engine_all = true
+                        end
+                        local chaos_value_rules = {
+                            {id = 'blind_scaling', const = 0.5, mult = 3.5, round = false},
+                            {id = 'all_shop_scaling', const = 0.75, mult = 2, round = false},
+                            {id = 'win_ante', const = (G.GAME.win_ante or 8) - 2, mult = 6, round = true, dp = 1},
+                            {id = 'money_total_scaling', const = 25, mult = 100, round = true, dp = 100}
+                        }
+                        for k, v in ipairs(chaos_value_rules) do --add chaos_value_rules randomised
+                            local rnd_num = pseudorandom('rule')
+                            if v.round == true then
+                                if rnd_num < 0.5 then
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = v.id, value = math.floor(v.const + (rnd_num*v.mult))/v.dp}
+                                else
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = v.id, value = math.ceil(v.const + (rnd_num*v.mult))/v.dp}
+                                end
+                            else
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = v.id, value = v.const + (rnd_num*v.mult)}
+                            end
+                        end
+                        
+                        local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_tags) do --choose a random tag to add as anaglyph rule to the chaos engine
+                            if chaos_number < k/#G.GAME.chaos_tags then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_'..v, nodes = {}}, tag = v}
+                                break
+                            end
+                        end
+
+                        local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_editions) do --choose a random playing card edition to add as a ban
+                            if chaos_number < k/#G.GAME.chaos_editions then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'_cards', edition_type = 'cards'}
+                                break
+                            end
+                        end
+
+                        local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
+                            if chaos_number < k/#G.GAME.chaos_editions then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'s', edition_type = 'all'}
+                                break
+                            end
+                        end
+
+                        local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_editions_jokers) do --choose a random joker edition to add as a ban
+                            if chaos_number < k/#G.GAME.chaos_editions_jokers then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'_jokers', edition_type = 'jokers'}
+                                break
+                            end
+                        end
+
                         local chaos_number = pseudorandom('chaos_engine')
                         for k, v in ipairs(G.GAME.chaos_engine_rules) do
                             if chaos_number < k/#G.GAME.chaos_engine_rules then
                                 if v.id == 'enable_eternal_jokers' then
                                     G.GAME.modifiers.enable_eternals_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_eternal'}
+                                elseif v.id == 'all_eternal' then
+                                    G.GAME.modifiers.all_eternal = true
+                                    for kk, vv in ipairs(G.jokers.cards) do
+                                        vv:set_eternal(true)
+                                    end
                                 elseif v.id == 'enable_rental_jokers' then
                                     G.GAME.modifiers.enable_rentals_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_rental_jokers'}
+                                    local rnd_num = pseudorandom('rule')
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'rental_rate', value = math.ceil(2 + rnd_num*4)}
+                                elseif v.id == 'all_rental_jokers' then    
+                                    G.GAME.modifiers.all_rental_jokers = true
+                                    for kk, vv in ipairs(G.jokers.cards) do
+                                        vv:set_rental(true)
+                                    end
                                 elseif v.id == 'enable_perishable_jokers' then
                                     G.GAME.modifiers.enable_perishables_in_shop = true
+                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_perishable_jokers'}
+                                elseif v.id == 'all_perishable_jokers' then
+                                    G.GAME.modifiers.all_perishable_jokers = true
+                                    for kk, vv in ipairs(G.jokers.cards) do
+                                        vv:set_perishable(true)
+                                    end
+                                elseif v.id == 'win_ante' then
+                                    G.GAME.win_ante = v.value
+                                elseif v.id == 'no_vouchers' then
+                                    G.GAME.modifiers.no_vouchers = true
+                                    G.GAME.current_round.voucher = nil
+                                    G.GAME.banned_keys['tag_voucher'] = true
+                                    for kk, vv in ipairs(G.GAME.chaos_tags) do
+                                        if vv == 'voucher' or vv == 'cry_better_voucher' then
+                                            table.remove(G.GAME.chaos_tags, kk)
+                                        end
+                                    end
                                 elseif v.id == 'blind_scaling' then
                                     G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
                                 elseif v.value then
@@ -276,10 +564,39 @@ function Game:start_run(args)
                                     G.GAME.modifiers[v.id] = true
                                 end
                                 G.GAME.chaos_rules[#G.GAME.chaos_rules+1] = v
-                                table.remove(G.GAME.chaos_engine_rules, k)
+                                if v.id ~= 'anaglyph' or not v.edition_type then
+                                    table.remove(G.GAME.chaos_engine_rules, k)
+                                elseif v.edition_type then
+                                    if v.edition_type == 'cards' then
+                                        local chaos_number = pseudorandom('chaos_engine')
+                                        for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random playing card edition to add as a ban
+                                            if chaos_number < kk/#G.GAME.chaos_editions then
+                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_cards', edition_type = 'cards'}
+                                                break
+                                            end
+                                        end
+                                    elseif v.edition_type == 'jokers' then
+                                        local chaos_number = pseudorandom('chaos_engine')
+                                        for kk, vv in ipairs(G.GAME.chaos_editions_jokers) do --choose a random joker edition to add as a ban
+                                            if chaos_number < kk/#G.GAME.chaos_editions_jokers then
+                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_jokers', edition_type = 'jokers'}
+                                                break
+                                            end
+                                        end
+                                    else
+                                        local chaos_number = pseudorandom('chaos_engine')
+                                        for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
+                                            if chaos_number < kk/#G.GAME.chaos_editions then
+                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'s', edition_type = 'all'}
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
                                 break
                             end
                         end
+                    
                     elseif v.id == 'dummy_rule' then --NOTHING????
                     else
                     end
@@ -492,6 +809,62 @@ function Card:set_edition(edition, immediate, silent)
             run = false
         end
     end
+    if (SMODS.Mods.Cryptid or {}).can_load then
+        if (edition == "e_cry_mosaic" or edition.cry_mosaic) and G.GAME.modifiers.no_mosaic_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_mosaic" or edition.cry_mosaic) and G.GAME.modifiers.no_mosaic_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+
+        if (edition == "e_cry_glitched" or edition.cry_glitched) and G.GAME.modifiers.no_glitched_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_glitched" or edition.cry_glitched) and G.GAME.modifiers.no_glitched_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+
+        if (edition == "e_cry_oversat" or edition.cry_oversat) and G.GAME.modifiers.no_oversat_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_oversat" or edition.cry_oversat) and G.GAME.modifiers.no_oversat_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+
+        if (edition == "e_cry_gold" or edition.cry_gold) and G.GAME.modifiers.no_gold_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_gold" or edition.cry_gold) and G.GAME.modifiers.no_gold_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+
+        if (edition == "e_cry_glass" or edition.cry_glass) and G.GAME.modifiers.no_glass_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_glass" or edition.cry_glass) and G.GAME.modifiers.no_glass_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+
+        if (edition == "e_cry_blur" or edition.cry_blur) and G.GAME.modifiers.no_blur_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_blur" or edition.cry_blur) and G.GAME.modifiers.no_blur_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+
+        if (edition == "e_cry_astral" or edition.cry_astral) and G.GAME.modifiers.no_astral_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_astral" or edition.cry_astral) and G.GAME.modifiers.no_astral_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+        if (edition == "e_cry_m" or edition.cry_m) and G.GAME.modifiers.no_m_jokers and self.ability.set == "Joker" then
+            run = false
+        end
+        if (edition == "e_cry_m" or edition.cry_m) and G.GAME.modifiers.no_m_cards and not(self.ability.set == "Joker") then
+            run = false
+        end
+    end
     if silent == true then
         run = true
     end
@@ -651,12 +1024,12 @@ function Card:set_rental(_rental)
 end
 
 -- test challenge
-SMODS.Challenge{
+--[[SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
         custom = {
-            {id = 'chaos_engine'}
+            {id = 'world_machine'}
     },
         modifiers = {
         },
@@ -668,6 +1041,6 @@ SMODS.Challenge{
         banned_tags = {},
         banned_other = {}
     },
-    }
+    }]]
 ----------------------------------------------
 ------------MOD CODE END----------------------
