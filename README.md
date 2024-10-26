@@ -1,6 +1,6 @@
 # Challenger Deep
 
-This is a Balatro mod that adds several rules that can be added to Challenges, for example banning Editions.
+This is a Balatro mod that adds several rules that can be added to Challenges, for example banning Editions. Also a Sticker now!
 
 ## Rule List
 
@@ -47,8 +47,14 @@ Cryptid editions: `mosaic`, `glitched`, `oversat`, `gold`, `glass`, `blur`, `ast
 
 #### Stickers
 
-- `"enable_eternal_jokers"`, `"enable_rental_jokers"`,`"enable_perishable_jokers"` - Jokers can have the specified Sticker.
-- `"all_rental_jokers"`, `"all_perishable_jokers"` - All Jokers will have the specified Sticker.
+- `"enable_(sticker)_jokers"` - Jokers can have the specified Sticker.
+- `"all_(sticker)_jokers"` - All Jokers will have the specified Sticker. (For Eternal, use base game `"all_eternal"`)
+
+Possible stickers for the previous two rules:
+Base game: `eternal`, `rental`, `perishable`
+Challenger Deep: `singular`
+Bunco: `scattering`, `reactive`, `hindered`
+  
 - `"rentals_keep_price"` - Rental Jokers will retain their price.
 - `{id = "rental_rate", value = x}` - Rental Jokers will have their rate set to x dollars. At the end of a round, for each Rental Joker, x dollars will be deducted from the player.
 - `{id = "rental_rate_increase", value = x}` - Rental rate increases by x every Ante.
@@ -92,6 +98,10 @@ At the beginning of a Chaos Engine run, the following rules are possible:
 - `{id = "mts_scaling", value = x}` - The money multiplier `money_total_scaling` has x added to it every Ante.
 
 - - `{id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_x', nodes = {}}, tag = 'x'}` - Creates a Tag with the key `tag_x` every round.
+
+## Sticker
+
+Singular Jokers cannot be duplicated.
 
 ## Example Challenges
 
