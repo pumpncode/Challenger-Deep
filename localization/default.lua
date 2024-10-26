@@ -77,9 +77,17 @@ return {
             ch_c_enable_eternal_jokers = {"{C:attention}Jokers{} can be {C:attention}Eternal"},
             ch_c_enable_rental_jokers = {"{C:attention}Jokers{} can be {C:attention}Rental"},
             ch_c_enable_perishable_jokers = {"{C:attention}Jokers{} can be {C:attention}Perishable"},
+            ch_c_enable_singular_jokers = {"{C:attention}Jokers{} can be {C:attention}Singular {C:inactive}(Challenger Deep)"}, --ME I DID THIS!!! MY STICKER
+            ch_c_enable_scattering_jokers = {"{C:attention}Jokers{} can be {C:attention}Scattering {C:inactive}(Bunco)"},
+            ch_c_enable_reactive_jokers = {"{C:attention}Jokers{} can be {C:attention}Reactive {C:inactive}(Bunco)"},
+            ch_c_enable_hindered_jokers = {"{C:attention}Jokers{} can be {C:attention}Hindered {C:inactive}(Bunco)"},
         
-            ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental {C:inactive}{If compatible}"},
-            ch_c_all_perishable_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable {C:inactive}{If compatible}"},
+            ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental {C:inactive}(If compatible)"},
+            ch_c_all_perishable_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable {C:inactive}(If compatible)"},
+            ch_c_all_singular_jokers = {"All {C:attention}Jokers{} are {C:attention}Singular {C:inactive}(If compatible, Challenger Deep)"},
+            ch_c_all_reactive_jokers = {"All {C:attention}Jokers{} are {C:attention}Reactive {C:inactive}(If compatible, Bunco)"},
+            ch_c_all_scattering_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable {C:inactive}(If compatible, Bunco)"},
+            ch_c_all_hindered_jokers = {"All {C:attention}Jokers{} are {C:attention}Singular {C:inactive}(If compatible, Bunco)"},
 
             ch_c_rental_rate = {"{C:attention}Rental Jokers{} cost {C:money}$#1#{} per round"},
             ch_c_rental_rate_increase = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} per ante"},

@@ -107,6 +107,12 @@ if G.GAME.modifiers.chaos_engine_all then
                                     for kk, vv in ipairs(G.jokers.cards) do
                                         vv:set_perishable(true)
                                     end
+                                elseif v.id == 'enable_scattering_jokers' then
+                                    G.GAME.modifiers.enable_scattering_in_shop = true
+                                elseif v.id == 'enable_reactive_jokers' then
+                                    G.GAME.modifiers.enable_reactive_in_shop = true
+                                elseif v.id == 'enable_hindered_jokers' then
+                                    G.GAME.modifiers.enable_hindered_in_shop = true
                                 elseif v.id == 'win_ante' then
                                     G.GAME.win_ante = v.value
                                 elseif v.id == 'no_vouchers' then
@@ -120,6 +126,13 @@ if G.GAME.modifiers.chaos_engine_all then
                                     end
                                 elseif v.id == 'anaglyph' then
                                     G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
+                                    local chaos_number = pseudorandom('chaos_engine')
+                                    for k, v in ipairs(G.GAME.chaos_tags) do --choose a random tag to add as anaglyph rule to the chaos engine
+                                        if chaos_number < k/#G.GAME.chaos_tags then
+                                            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_'..v, nodes = {}}, tag = v}
+                                            break
+                                        end
+                                    end
                                 elseif v.id == 'blind_scaling' then
                                     G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
                                 elseif v.value then
@@ -128,34 +141,35 @@ if G.GAME.modifiers.chaos_engine_all then
                                     G.GAME.modifiers[v.id] = true
                                 end
                                 G.GAME.chaos_rules[#G.GAME.chaos_rules+1] = v
-                                if v.id ~= 'anaglyph' or not v.edition_type then
-                                    table.remove(G.GAME.chaos_engine_rules, k)
-                                elseif v.edition_type then
-                                    if v.edition_type == 'cards' then
-                                        local chaos_number = pseudorandom('chaos_engine')
-                                        for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random playing card edition to add as a ban
-                                            if chaos_number < kk/#G.GAME.chaos_editions then
-                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_cards', edition_type = 'cards'}
-                                                break
-                                            end
-                                        end
-                                    elseif v.edition_type == 'jokers' then
-                                        local chaos_number = pseudorandom('chaos_engine')
-                                        for kk, vv in ipairs(G.GAME.chaos_editions_jokers) do --choose a random joker edition to add as a ban
-                                            if chaos_number < kk/#G.GAME.chaos_editions_jokers then
-                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_jokers', edition_type = 'jokers'}
-                                                break
-                                            end
-                                        end
-                                    else
-                                        local chaos_number = pseudorandom('chaos_engine')
-                                        for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
-                                            if chaos_number < kk/#G.GAME.chaos_editions then
-                                                G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'s', edition_type = 'all'}
-                                                break
-                                            end
+                                if v.edition_type == 'cards' and #G.GAME.chaos_editions_cards > 0 then
+                                    local chaos_number = pseudorandom('chaos_engine')
+                                    for kk, vv in ipairs(G.GAME.chaos_editions_cards) do --choose a random playing card edition to add as a ban
+                                        if chaos_number < kk/#G.GAME.chaos_editions_cards then
+                                            G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_cards', edition_type = 'cards'}
+                                            table.remove(G.GAME.chaos_editions_cards, kk)
+                                            break
                                         end
                                     end
+                                elseif v.edition_type == 'jokers' and #G.GAME.chaos_editions_jokers > 0 then
+                                    local chaos_number = pseudorandom('chaos_engine')
+                                    for kk, vv in ipairs(G.GAME.chaos_editions_jokers) do --choose a random joker edition to add as a ban
+                                        if chaos_number < kk/#G.GAME.chaos_editions_jokers then
+                                            G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'_jokers', edition_type = 'jokers'}
+                                            table.remove(G.GAME.chaos_editions_jokers, kk)
+                                            break
+                                        end
+                                    end
+                                elseif v.edition_type == 'all' and #G.GAME.chaos_editions > 0 then
+                                    local chaos_number = pseudorandom('chaos_engine')
+                                    for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
+                                        if chaos_number < kk/#G.GAME.chaos_editions then
+                                            G.GAME.chaos_engine_rules[k] = {id = 'no_'..vv..'s', edition_type = 'all'}
+                                            table.remove(G.GAME.chaos_editions, kk)
+                                            break
+                                        end
+                                    end
+                                elseif v.id ~= 'anaglyph' then
+                                    table.remove(G.GAME.chaos_engine_rules, k)
                                 end
                                 break
                             end

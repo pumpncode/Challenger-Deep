@@ -43,18 +43,10 @@ payload = '''
 [[patches]]
 [patches.pattern]
 target = "card.lua"
-pattern = "self.sell_cost = math.max(1, math.floor(self.cost/2)) + (self.ability.extra_value or 0)"
-position = "after"
+pattern = "self.cost = math.max(1, math.floor((self.base_cost + self.extra_cost + 0.5)*(100-G.GAME.discount_percent)/100))"
+position = "at"
 match_indent = true
-payload = '''
-if not G.GAME.modifiers.all_shop_scaling then G.GAME.modifiers.all_shop_scaling = 1 end
-if G.GAME.modifiers.all_shop_scaling ~= 1 then
-    if (self.cost*G.GAME.modifiers.all_shop_scaling) % 1 < 0.5 then
-        self.cost = math.floor(self.cost*G.GAME.modifiers.all_shop_scaling)
-    else
-        self.cost = math.ceil(self.cost*G.GAME.modifiers.all_shop_scaling)
-    end
-end'''
+payload = 'self.cost = math.max(1, math.floor(((self.base_cost*(G.GAME.modifiers.all_shop_scaling or 1)) + self.extra_cost + 0.5)*(100-G.GAME.discount_percent)/100))'
 
 # I DONT LIKE VOUCHERS
 [[patches]]
