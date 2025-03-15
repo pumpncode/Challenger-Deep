@@ -26,6 +26,11 @@ Cryptid editions: `mosaic`, `glitched`, `oversat`, `gold`, `glass`, `blur`, `ast
 - `"no_(EDITION)_jokers` - Removes (EDITION) from jokers.
 - `"no_(EDITION)_cards"` - Removes (EDITION) from Playing Cards.
 
+### Banning Hands
+
+-`{id = 'disable_hand', value = (display), hand = x}` - Bans the hand with the in-game identifier x.
+-`{id = 'disable_hand_containing', value = (display), hand = x}` - Bans hands that contain the hand type x, i.e. banning Straights this way will also ban Straight Flushes.
+
 ### Blinds
 
 - `{id = "blind_scaling", value = x}` - Multiplies the chip requirement for every blind by x, where x is a number. For best results, I would suggest x is between 1 and 3.
@@ -52,7 +57,7 @@ Cryptid editions: `mosaic`, `glitched`, `oversat`, `gold`, `glass`, `blur`, `ast
 
 Possible stickers for the previous two rules:
 Base game: `eternal`, `rental`, `perishable`
-Challenger Deep: `singular`
+Challenger Deep: `singular`, `shrouded`
 Bunco: `scattering`, `reactive`, `hindered`
   
 - `"rentals_keep_price"` - Rental Jokers will retain their price.
@@ -69,6 +74,12 @@ Bunco: `scattering`, `reactive`, `hindered`
 - `{id = "all_shop_scaling", value = x}` - The price of every item in the shop is multiplied by x
 - `{id = "shop_scaling_round_increase", value = x}` - `all_shop_scaling` increases by x every round
 - `{id = "shop_scaling_ante_increase", value = x}` - `all_shop_scaling` increases by x every Ante
+
+- `"disable_rerolls"` - Rerolls are disabled.
+
+- `{id = "forced_joker", value = (display), card = x}` - The first Joker in the Shop is the Joker with the key x. (i.e. for the default Joker card, x = 'j_joker')
+- `{id = "forced_joker_all", value = (display), card = x}` - Every Joker in the Shop is the Joker with they key x.
+- `{id = "forced_joker_pool", value = (display), pool = x}` - Every Joker in the Shop is drawn from the pool x, where each entry is the Joker's key.
 
 ### Chaos Engine
 
@@ -102,6 +113,8 @@ At the beginning of a Chaos Engine run, the following rules are possible:
 ## Sticker
 
 Singular Jokers cannot be duplicated.
+
+Shrouded Jokers are flipped upon obtaining them.
 
 ## Example Challenges
 
