@@ -15,6 +15,13 @@ SMODS.Atlas {
     py = 95
   }
 
+SMODS.Atlas{
+    key = "chdpshrouded",
+    path = "deckatlas.png",
+    px = 71,
+    py = 95
+}
+
 local Backapply_to_run_Ref = Back.apply_to_run
 function Back:apply_to_run()
     Backapply_to_run_Ref(self)
@@ -78,6 +85,11 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.mts_scaling = 0
 
+    -- HANDS
+
+    G.GAME.modifiers.disable_hand = {}
+    G.GAME.modifiers.disable_hand_containing = {}
+
     --JOKER FUN
 
     G.GAME.modifiers.minus_jokers_per_dollar = 0
@@ -104,6 +116,8 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.all_singular_jokers = false
 
+    G.GAME.modifiers.all_shrouded_jokers = false
+
     --SHOP
 
     G.GAME.modifiers.no_vouchers = false
@@ -111,8 +125,12 @@ function Back:apply_to_run()
     G.GAME.modifiers.all_shop_scaling = 1
     G.GAME.modifiers.shop_scaling_ante_increase = 0
     G.GAME.modifiers.shop_scaling_round_increase = 0
+    G.GAME.modifiers.disable_rerolls = false
+    G.GAME.modifiers.forced_joker = nil
+    G.GAME.modifiers.forced_joker_all = nil
+    G.GAME.modifiers.forced_joker_pool = {}
 
-    G.GAME.modifiers.anaglyph = {}
+    G.GAME.modifiers.anaglyph = {} --be an array please i want you to be an array for me
 
     G.GAME.chdp_spacer = false
 
@@ -148,6 +166,20 @@ function Back:apply_to_run()
         'holo',
         'polychrome'
     }
+    G.GAME.chaos_hands = {
+        'High Card',
+        'Pair',
+        'Two Pair',
+        'Full House',
+        'Flush',
+        'Straight',
+        'Straight Flush',
+        'Three of a Kind',
+        'Four of a Kind',
+        'Five of a Kind',
+        'Flush Five',
+        'Flush House'
+    }
     G.GAME.chaos_engine_rules = {
         {id = 'no_vouchers'},
         {id = 'enable_eternal_jokers'},
@@ -180,13 +212,13 @@ function Back:apply_to_run()
         local chaos_bunc_rules = {
             {id = 'enable_scattering_jokers'},
             {id = 'enable_reactive_jokers'},
-            {id = 'enable_hindered_jokers'}
+            {id = 'enable_hindered_jokers'},
+            {id = 'disable_hand_containing', value = 'Spectrum', hand = 'bunc_Spectrum'}
         }
         for k, v in ipairs(chaos_bunc_rules) do
             G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = v
         end
     end
-
 
     if (SMODS.Mods.Cryptid or {}).can_load then
         local cryptid_config = SMODS.load_mod_config({id = "Cryptid", path = SMODS.Mods.Cryptid.path}) -- cryptid config
@@ -257,6 +289,10 @@ function Game:start_run(args)
             local _ch = args.challenge
             G.GAME.challenge_index = args.challenge
             if _ch.rules then
+
+                local anaglyphRules = {} --NEW ARRAY!!! :3
+                local disabledHands = {}
+                local disabledContaining = {}
                 if _ch.rules.custom then
                     for k, v in ipairs(_ch.rules.custom)do
 
@@ -395,6 +431,14 @@ function Game:start_run(args)
                         G.GAME.modifiers.mts_scaling = v.value
                         G.GAME.chdp_spacer = true
 
+                        -- HANDS
+                    
+                    elseif v.id == 'disable_hand' then --hand is not allowed
+                        disabledHands[#disabledHands+1] = v.hand
+
+                    elseif v.id == 'disable_hand_containing' then --hands with this in them are not allowed
+                        disabledContaining[#disabledContaining+1] = v.hand
+                    
                         -- JOKER FUN
 
                     elseif v.id == 'minus_jokers_per_dollar' then -- -1 joker per value dollar
@@ -425,6 +469,8 @@ function Game:start_run(args)
 
                     elseif v.id == 'enable_singular_jokers' then --the dragon warrior... ITS ME!!!
                         G.GAME.modifiers.enable_singulars_in_shop = true
+                    elseif v.id == 'enable_shrouded_jokers' then
+                        G.GAME.modifiers.enable_shroudeds_in_shop = true
 
                     elseif v.id == 'enable_scattering_jokers' then --bunco time
                         G.GAME.modifiers.enable_scattering_in_shop = true
@@ -456,6 +502,9 @@ function Game:start_run(args)
                     elseif v.id == 'all_singular_jokers' then -- all jokers are MINE I DID THIS TO THEM
                         G.GAME.modifiers.all_singular_jokers = true
 
+                    elseif v.id == 'all_shrouded_jokers' then -- all jokers are MINE I DID THIS TO THEM
+                        G.GAME.modifiers.all_shrouded_jokers = true
+
                     elseif v.id == 'all_reactive_jokers' then
                         G.GAME.modifiers.all_reactive_jokers = true
                     elseif v.id == 'all_hindered_jokers' then
@@ -474,11 +523,39 @@ function Game:start_run(args)
                         G.GAME.modifiers.shop_scaling_ante_increase = v.value
                     elseif v.id == 'shop_scaling_round_increase' then --shop price mult = shop price mult + value every round
                         G.GAME.modifiers.shop_scaling_round_increase = v.value
+                    elseif v.id == 'disable_rerolls' then --shop price mult = shop price mult + value every round
+                        G.GAME.modifiers.disable_rerolls = true
+                    elseif v.id == 'forced_joker' then --forces a joker as the first joker in the shop
+                        G.GAME.modifiers.forced_joker = v.card
+                    elseif v.id == 'forced_joker_all' then --forces a joker as EVERY joker in the shop
+                        G.GAME.modifiers.forced_joker_all = v.card
+                    elseif v.id == 'forced_joker_pool' then --forces a pool of jokers as every joker in the shop
+                        G.GAME.modifiers.forced_joker_pool = v.pool
 
                         -- TAG
 
                     elseif v.id == 'anaglyph' then --creates tag with name 'value'
-                        G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
+                        anaglyphRules[#anaglyphRules+1] = v.tag
+                    
+                        -- WUMPUS AND CLYDE
+
+                    elseif v.id == 'discord_suits' then --adds Wumpus and Clyde suits REQUIRES WUMPUS AND CLYDE
+                        G.GAME.wumpandclyde = true
+		                local ranks = {'A','2','3','4','5','6','7','8','9','T','K','Q','J'}
+		                local suits = {'wump_CLYDE','wump_WUMPUS'}
+                        local cards = {}
+		
+		                G.E_MANAGER:add_event(Event({
+			                func = function()
+				                for _, v in ipairs(ranks) do
+					                for j, k in ipairs(suits) do
+						                table.insert(cards, create_playing_card({front = G.P_CARDS[k..'_'..v]}, G.deck, nil, nil, {G.C.RED}))
+					                end
+				                end
+				                return true
+			                end
+		                }))
+
                         -- MISCELLANEOUS
 
                     elseif v.id == 'win_ante' then --sets win ante
@@ -509,6 +586,14 @@ function Game:start_run(args)
                             end
                         end
                         
+                        for k, v in ipairs(_ch.rules.custom) do --remove rules that are already used
+                            for kk, vv in ipairs(G.GAME.chaos_engine_rules) do
+                                if v.id == vv.id then
+                                    table.remove(G.GAME.chaos_engine_rules, kk)
+                                end
+                            end
+                        end
+
                         local chaos_number = pseudorandom('chaos_engine')
                         for k, v in ipairs(G.GAME.chaos_tags) do --choose a random tag to add as anaglyph rule to the chaos engine
                             if chaos_number < k/#G.GAME.chaos_tags then
@@ -540,6 +625,14 @@ function Game:start_run(args)
                             if chaos_number < k/#G.GAME.chaos_editions_jokers then
                                 G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'_jokers', edition_type = 'jokers'}
                                 table.remove(G.GAME.chaos_editions_jokers, k)
+                                break
+                            end
+                        end
+
+                        local chaos_number = pseudorandom('chaos_engine')
+                        for k, v in ipairs(G.GAME.chaos_hands) do --choose a random hand to ban
+                            if chaos_number < k/#G.GAME.chaos_hands then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'disable_hand', value = v, hand = v}
                                 break
                             end
                         end
@@ -579,6 +672,8 @@ function Game:start_run(args)
                                     G.GAME.modifiers.enable_reactive_in_shop = true
                                 elseif v.id == 'enable_hindered_jokers' then
                                     G.GAME.modifiers.enable_hindered_in_shop = true
+                                elseif v.id == 'enable_shrouded_jokers' then
+                                    G.GAME.modifiers.enable_shroudeds_in_shop = true
                                 elseif v.id == 'anaglyph' then
                                     G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
                                     local chaos_number = pseudorandom('chaos_engine')
@@ -603,6 +698,19 @@ function Game:start_run(args)
                                     end
                                 elseif v.id == 'blind_scaling' then
                                     G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                                
+                                elseif v.id == 'disable_hand' then
+                                    disabledHands[#disabledHands+1] = v.hand
+                                    local chaos_number = pseudorandom('chaos_engine')
+                                    for k, v in ipairs(G.GAME.chaos_hands) do --choose a random hand to ban
+                                        if chaos_number < k/#G.GAME.chaos_hands then
+                                            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'disable_hand', value = v, hand = v}
+                                            break
+                                        end
+                                    end
+                                elseif v.id == 'disable_hand_containing' then
+                                    disabledContaining[#disabledContaining+1] = v.hand
+                               
                                 elseif v.value then
                                     G.GAME.modifiers[v.id] = v.value
                                 else
@@ -648,6 +756,9 @@ function Game:start_run(args)
                     end
                     end
                 end
+                G.GAME.modifiers.anaglyph = anaglyphRules
+                G.GAME.modifiers.disable_hand = disabledHands
+                G.GAME.modifiers.disable_hand_containing = disabledContaining
             end
         end
     end
@@ -807,6 +918,9 @@ function Card:set_edition(edition, immediate, silent)
         end
         if G.GAME.modifiers.all_singular_jokers == true then
             self.ability.chdp_singular = true
+        end
+        if G.GAME.modifiers.all_shrouded_jokers == true then
+            self.ability.chdp_shrouded = true
         end
         if (SMODS.Mods.Bunco or {}).can_load then
             if G.GAME.modifiers.all_hindered_jokers == true then
@@ -1083,6 +1197,26 @@ function Card:set_rental(_rental)
     end
 end
 
+local debuff_hand_ref = Blind.debuff_hand
+function Blind:debuff_hand(cards, hand, handname, check)
+    local result = debuff_hand_ref(self,cards, hand, handname, check)
+    if G.GAME.modifiers.disable_hand then
+        for k, v in ipairs(G.GAME.modifiers.disable_hand) do
+            if handname == v then
+                return true
+            end
+        end
+    end
+    if G.GAME.modifiers.disable_hand_containing then
+        for k, v in ipairs(G.GAME.modifiers.disable_hand_containing) do
+            if next(hand[v]) then
+                return true
+            end
+        end
+    end
+    return result
+end
+
 --HAVE A STICKER
 
 SMODS.Sticker{
@@ -1106,13 +1240,34 @@ SMODS.Sticker{
     pos = {x = 0, y = 0}
 }
 
+SMODS.Sticker{
+    key = 'shrouded',
+    loc_txt = {
+        name = 'Shrouded',
+        label = 'Shrouded',
+        text = {
+            'Card flips when obtained,',
+            'cannot be unflipped'
+        }
+    },
+
+    apply = function(self, card, val)
+        card.ability[self.key] = val
+    end,
+
+    order = 9,
+    badge_colour = HEX('54575c'),
+    atlas = 'chdpstickers',
+    pos = {x = 1, y = 0}
+}
+
 -- test challenge
 SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
         custom = {
-            {id = 'world_machine'}
+            {id = 'chaos_engine_all'}
     },
         modifiers = {
         },
@@ -1124,9 +1279,31 @@ SMODS.Challenge{
         banned_tags = {},
         banned_other = {}
     },
-    }
+}
 
---[[SMODS.Challenge{
+    SMODS.Challenge{
+        loc_txt = "Test 2",
+        key = 'test_2',
+        rules = {
+            custom = {
+                {id = 'forced_joker_pool', pool = {
+                    'j_chicot',
+                    'j_egg'
+                }}
+            },
+            modifiers = {
+            },
+        },
+        jokers = {
+        },
+        restrictions = {
+            banned_cards = {},
+            banned_tags = {},
+            banned_other = {}
+        },
+        }
+        
+SMODS.Challenge{
     loc_txt = "Balatro: Sticker Star",
     key = "chdp_sticker_1",
     rules = {
@@ -1155,6 +1332,6 @@ SMODS.Challenge{
             {id = 'all_hindered_jokers'}
         }
     }
-}]]
+}
 ----------------------------------------------
 ------------MOD CODE END----------------------
