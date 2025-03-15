@@ -16,6 +16,7 @@ return {
             ch_c_no_holo_cards = {"{C:attention}Playing cards{} can no longer be {C:dark_edition}Holographic"},
             ch_c_no_holo_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Holographic"},
         
+            ch_c_no_negative_cards = {"are you magic?"},
             ch_c_no_negative_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Negative"},
         
             ch_c_no_polychromes = {"{C:attention}Polychrome{} cards will no longer appear"},
@@ -78,6 +79,7 @@ return {
             ch_c_enable_rental_jokers = {"{C:attention}Jokers{} can be {C:attention}Rental"},
             ch_c_enable_perishable_jokers = {"{C:attention}Jokers{} can be {C:attention}Perishable"},
             ch_c_enable_singular_jokers = {"{C:attention}Jokers{} can be {C:attention}Singular {C:inactive}(Challenger Deep)"}, --ME I DID THIS!!! MY STICKER
+            ch_c_enable_shrouded_jokers = {"{C:attention}Jokers{} can be {C:attention}Shrouded {C:inactive}(Challenger Deep)"},
             ch_c_enable_scattering_jokers = {"{C:attention}Jokers{} can be {C:attention}Scattering {C:inactive}(Bunco)"},
             ch_c_enable_reactive_jokers = {"{C:attention}Jokers{} can be {C:attention}Reactive {C:inactive}(Bunco)"},
             ch_c_enable_hindered_jokers = {"{C:attention}Jokers{} can be {C:attention}Hindered {C:inactive}(Bunco)"},
@@ -85,9 +87,10 @@ return {
             ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental {C:inactive}(If compatible)"},
             ch_c_all_perishable_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable {C:inactive}(If compatible)"},
             ch_c_all_singular_jokers = {"All {C:attention}Jokers{} are {C:attention}Singular {C:inactive}(If compatible, Challenger Deep)"},
+            ch_c_all_shrouded_jokers = {"All {C:attention}Jokers{} are {C:attention}Shrouded {C:inactive}(If compatible, Challenger Deep)"},
             ch_c_all_reactive_jokers = {"All {C:attention}Jokers{} are {C:attention}Reactive {C:inactive}(If compatible, Bunco)"},
-            ch_c_all_scattering_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable {C:inactive}(If compatible, Bunco)"},
-            ch_c_all_hindered_jokers = {"All {C:attention}Jokers{} are {C:attention}Singular {C:inactive}(If compatible, Bunco)"},
+            ch_c_all_scattering_jokers = {"All {C:attention}Jokers{} are {C:attention}Scattering {C:inactive}(If compatible, Bunco)"},
+            ch_c_all_hindered_jokers = {"All {C:attention}Jokers{} are {C:attention}Hindered {C:inactive}(If compatible, Bunco)"},
 
             ch_c_rental_rate = {"{C:attention}Rental Jokers{} cost {C:money}$#1#{} per round"},
             ch_c_rental_rate_increase = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} per ante"},
@@ -96,6 +99,9 @@ return {
             ch_c_perishable_rounds = {"{C:attention}Perishable Jokers{} are debuffed after #1# round(s)"},
 
             ch_c_rentals_keep_price = {"{C:attention}Rental Jokers{} retain their price"},
+
+            ch_c_disable_hand = {"{C:attention}#1#{} Hands are not allowed"},
+            ch_c_disable_hand_containing = {"Hands containing a {C:attention}#1#{} are not allowed"},
 
             ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
             ch_c_extra_hand_money_scaling = {"Extra {C:blue}Hand{} money is multiplied by {C:red}X#1#"},
@@ -107,11 +113,19 @@ return {
             ch_c_all_shop_scaling = {"The price of all {C:green}Shop{} items is multiplied by {C:red}X#1#"},
             ch_c_shop_scaling_ante_increase = {"Shop price multiplier increases by {C:red}X#1#{} per ante"},
             ch_c_shop_scaling_round_increase = {"Shop price multiplier increases by {C:red}X#1#{} every round"},
+            ch_c_forced_joker = {"First {C:attention}Shop Joker{} will be #1#"},
+            ch_c_forced_joker_pool = {"{C:attention}Shop Jokers{} will be pulled from a {C:attention}pre-determined pool"},
+            ch_c_forced_joker_all = {"Every {C:attention}Shop Joker{} will be #1#"},
+            ch_c_disable_rerolls = {"{C:green}Rerolls{} are {C:red}disabled"},
 
             ch_c_chaos_engine = {"{C:red}Chaos {C:inactive,S=0.5}(Enables a random Rule every Ante)"},
             ch_c_chaos_engine_all = {"{C:red}Chaos {C:inactive,S=0.5}(Enables a random Rule every Round)"},
             ch_c_world_machine = {"The {C:dark_edition}World Machine{} is active. {C:inactive,S=0.5}(Enables a random Rule every Round)"},
             ch_c_anaglyph = {'Creates a {C:attention}#1#{} when Boss Blind is defeated'},
+
+            ch_c_discord_suits = {'{C:attention}Discord{} suits enabled {C:inactive}(Wumpus and Clyde)'},
+
+            ch_c_hidden = {"This challenge is {C:attention}Hidden"},
             ch_c_dummy_rule = {"Dummy rule"}
         }
     }

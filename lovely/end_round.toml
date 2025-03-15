@@ -47,40 +47,23 @@ end
 if G.GAME.modifiers.shop_scaling_round_increase ~= 0 then
     G.GAME.modifiers.all_shop_scaling = G.GAME.modifiers.all_shop_scaling + G.GAME.modifiers.shop_scaling_round_increase
 end
-if (G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind == true) then
+if (G.GAME.modifiers.chaos_engine and G.GAME.from_boss_blind == true) or G.GAME.modifiers.chaos_engine_all then --i can do anything!
     local challenge = G.GAME.challenge_index
     local chaos_number = pseudorandom('chaos_engine')
+    disabledContaining = G.GAME.modifiers.disable_hand_containing
+    disabledHands = G.GAME.modifiers.disable_hand
                         for k, v in ipairs(G.GAME.chaos_engine_rules) do
                             if chaos_number < k/#G.GAME.chaos_engine_rules then
-                                if v.id == 'enable_eternal_jokers' then
-                                    G.GAME.modifiers.enable_eternals_in_shop = true
-                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1].id = 'all_eternal'
-                                elseif v.id == 'enable_rental_jokers' then
-                                    G.GAME.modifiers.enable_rentals_in_shop = true
-                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1].id = 'all_rental_jokers'
-                                elseif v.id == 'enable_perishable_jokers' then
-                                    G.GAME.modifiers.enable_perishables_in_shop = true
-                                    G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1].id = 'all_perishable_jokers'
-                                elseif v.id == 'win_ante' then
-                                    G.GAME.win_ante = v.value
-                                elseif v.id == 'blind_scaling' then
-                                    G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
-                                elseif v.value then
-                                    G.GAME.modifiers[v.id] = v.value
-                                else
-                                    G.GAME.modifiers[v.id] = true
+                                print("ADDING "..v.id)
+                                if v.value then
+                                    print("VALUE: "..v.value)
                                 end
-                                G.GAME.chaos_rules[#G.GAME.chaos_rules+1] = v
-                                table.remove(G.GAME.chaos_engine_rules, k)
-                                break
-                            end
-                        end
-end
-if G.GAME.modifiers.chaos_engine_all then
-    local challenge = G.GAME.challenge_index
-    local chaos_number = pseudorandom('chaos_engine')
-                        for k, v in ipairs(G.GAME.chaos_engine_rules) do
-                            if chaos_number < k/#G.GAME.chaos_engine_rules then
+                                if v.tag then
+                                    print("TAG: "..v.tag)
+                                end
+                                if v.hand then
+                                    print("HAND: "..v.hand)
+                                end
                                 if v.id == 'enable_eternal_jokers' then
                                     G.GAME.modifiers.enable_eternals_in_shop = true
                                     G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'all_eternal'}
@@ -113,6 +96,19 @@ if G.GAME.modifiers.chaos_engine_all then
                                     G.GAME.modifiers.enable_reactive_in_shop = true
                                 elseif v.id == 'enable_hindered_jokers' then
                                     G.GAME.modifiers.enable_hindered_in_shop = true
+                                elseif v.id == 'enable_shrouded_jokers' then
+                                    G.GAME.modifiers.enable_shroudeds_in_shop = true
+                                elseif v.id == 'anaglyph' then
+                                    G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
+                                    local chaos_number = pseudorandom('chaos_engine')
+                                    for k, v in ipairs(G.GAME.chaos_tags) do --choose a random tag to add as anaglyph rule to the chaos engine
+                                        if chaos_number < k/#G.GAME.chaos_tags then
+                                            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_'..v, nodes = {}}, tag = v}
+                                            break
+                                        end
+                                    end
+                                elseif v.id == 'no_shop_jokers' then
+                                    G.GAME.joker_rate = 0
                                 elseif v.id == 'win_ante' then
                                     G.GAME.win_ante = v.value
                                 elseif v.id == 'no_vouchers' then
@@ -124,17 +120,19 @@ if G.GAME.modifiers.chaos_engine_all then
                                             table.remove(G.GAME.chaos_tags, kk)
                                         end
                                     end
-                                elseif v.id == 'anaglyph' then
-                                    G.GAME.modifiers.anaglyph[#G.GAME.modifiers.anaglyph+1] = v.tag
+                                elseif v.id == 'blind_scaling' then
+                                    G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                                elseif v.id == 'disable_hand' then --hand is not allowed
+                                    disabledHands[#disabledHands+1] = v.hand
                                     local chaos_number = pseudorandom('chaos_engine')
-                                    for k, v in ipairs(G.GAME.chaos_tags) do --choose a random tag to add as anaglyph rule to the chaos engine
-                                        if chaos_number < k/#G.GAME.chaos_tags then
-                                            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_'..v, nodes = {}}, tag = v}
+                                    for k, v in ipairs(G.GAME.chaos_hands) do --choose a random hand to ban
+                                        if chaos_number < k/#G.GAME.chaos_hands then
+                                            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'disable_hand', value = v, hand = v}
                                             break
                                         end
                                     end
-                                elseif v.id == 'blind_scaling' then
-                                    G.GAME.starting_params.ante_scaling = G.GAME.starting_params.ante_scaling * v.value
+                                elseif v.id == 'disable_hand_containing' then --hands with this in them are not allowed
+                                    disabledContaining[#disabledContaining+1] = v.hand
                                 elseif v.value then
                                     G.GAME.modifiers[v.id] = v.value
                                 else
@@ -159,7 +157,7 @@ if G.GAME.modifiers.chaos_engine_all then
                                             break
                                         end
                                     end
-                                elseif v.edition_type == 'all' and #G.GAME.chaos_editions > 0 then
+                                elseif v.edition_type == 'all' and #G.GAME.chaos_editions > 0  then
                                     local chaos_number = pseudorandom('chaos_engine')
                                     for kk, vv in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
                                         if chaos_number < kk/#G.GAME.chaos_editions then
@@ -174,6 +172,8 @@ if G.GAME.modifiers.chaos_engine_all then
                                 break
                             end
                         end
+                    G.GAME.modifiers.disable_hand_containing = disabledContaining
+                    G.GAME.modifiers.disable_hand = disabledHands
 end
 if #G.GAME.modifiers.anaglyph > 0 and G.GAME.from_boss_blind == true then
     for k, v in ipairs(G.GAME.modifiers.anaglyph) do
