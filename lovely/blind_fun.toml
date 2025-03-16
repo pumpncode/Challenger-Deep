@@ -3,15 +3,6 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
-# THIS DOESNT DO WHAT I WANT IT TO!!!!!
-[[patches]]
-[patches.pattern]
-target = "functions/UI_definitions.lua"
-pattern = "if type == 'Small' then"
-position = "at"
-match_indent = true
-payload = "if type == 'Small' and not G.GAME.modifiers.disable_small then"
-
 # disable small blind
 [[patches]]
 [patches.pattern]
