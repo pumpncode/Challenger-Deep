@@ -3,6 +3,15 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
+# THIS DOESNT DO WHAT I WANT IT TO!!!!!
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = "if type == 'Small' then"
+position = "at"
+match_indent = true
+payload = "if type == 'Small' and not G.GAME.modifiers.disable_small then"
+
 # disable small blind
 [[patches]]
 [patches.pattern]
@@ -10,7 +19,7 @@ target = "functions/common_events.lua"
 pattern = "G.GAME.round_resets.blind_states.Small = 'Upcoming'"
 position = "at"
 match_indent = true
-payload = "G.GAME.round_resets.blind_states.Small = (G.GAME.modifiers.disable_small or (G.GAME.modifiers.disable_small_ante <= G.GAME.round_resets.ante) or G.GAME.modifiers.cry_no_small_blind) and 'Hide' or 'Upcoming'"
+payload = "G.GAME.round_resets.blind_states.Small = (G.GAME.modifiers.disable_small or (G.GAME.modifiers.disable_small_ante and G.GAME.modifiers.disable_small_ante <= G.GAME.round_resets.ante) or G.GAME.modifiers.cry_no_small_blind) and 'Hide' or 'Upcoming'"
 
 # disable big blind
 [[patches]]
@@ -19,4 +28,4 @@ target = "functions/common_events.lua"
 pattern = "G.GAME.round_resets.blind_states.Big = 'Upcoming'"
 position = "at"
 match_indent = true
-payload = "G.GAME.round_resets.blind_states.Big = (G.GAME.modifiers.disable_big or (G.GAME.modifiers.disable_big_ante <= G.GAME.round_resets.ante)) and 'Hide' or 'Upcoming'"
+payload = "G.GAME.round_resets.blind_states.Big = (G.GAME.modifiers.disable_big or (G.GAME.modifiers.disable_big_ante and G.GAME.modifiers.disable_big_ante <= G.GAME.round_resets.ante)) and 'Hide' or 'Upcoming'"
