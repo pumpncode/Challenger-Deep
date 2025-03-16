@@ -1,6 +1,6 @@
 # Challenger Deep
 
-This is a Balatro mod that adds several rules that can be added to Challenges, for example banning Editions. Also a Sticker now!
+Challenger Deep is a Balatro mod that adds 100+ Custom Rules to be used in Challenges.
 
 ## Rule List
 
@@ -66,6 +66,7 @@ Bunco: `scattering`, `reactive`, `hindered`
 - `{id = "rental_rate_increase_all", value = x}` - Rental rate increases by x every round.
 - `{id = "perishable_rounds", value = x}` - Perishable Jokers will be debuffed after x rounds.
 
+- `"enable_all_stickers"` - Every sticker featured in Challenger Deep rules can be found on Jokers. (sorry in advance)
 ### Shop
 
 - `{id = "reroll_cost_increase", value = x}` - Successive rerolls cost $x more each (e.g. when this is 1 (the default value), reroll 1 costs $5, reroll 2 costs $6 etc)
@@ -109,6 +110,8 @@ At the beginning of a Chaos Engine run, the following rules are possible:
 - `{id = "mts_scaling", value = x}` - The money multiplier `money_total_scaling` has x added to it every Ante.
 
 - - `{id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_x', nodes = {}}, tag = 'x'}` - Creates a Tag with the key `tag_x` every round.
+
+- `"hidden"` - Hides this Challenge from the Challenge page - will not be included in totals.
 
 ## Sticker
 
