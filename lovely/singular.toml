@@ -3,7 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
-# me adding the sticker
+# Singular Sticker functionality
 
 [[patches]]
 [patches.pattern]
@@ -56,7 +56,6 @@ pattern = "--if there is at least one joker"
 position = "after"
 match_indent = true
 payload = '''
--- EXCUSE ME THUNK CAN I PATCH HERE PLEASE
 local usable_jokers = 0
 for k, v in pairs(G.jokers.cards) do
     if not v.ability.chdp_singular then

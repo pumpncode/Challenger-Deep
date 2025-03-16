@@ -3,7 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
-# before the main one please
+# Set up round evaluation stuff - for CHDP rules. Sorry if it gets a little bit tall
 [[patches]]
 [patches.pattern]
 target = "functions/common_events.lua"

@@ -1,13 +1,3 @@
---- STEAMODDED HEADER
---- MOD_NAME: Challenger Deep
---- MOD_ID: ChDp
---- MOD_AUTHOR: [Opal]
---- MOD_DESCRIPTION: Adds some Challenge rules into the game, such as banning Editions.
---- DEPENDENCIES: [Steamodded>=1.0.0~ALPHA-0812d]
---- PREFIX: chdp
-----------------------------------------------
-------------MOD CODE ------------------------- 
-
 SMODS.Atlas {
     key = "chdpstickers",
     path = "stickers.png",
@@ -130,7 +120,11 @@ function Back:apply_to_run()
     G.GAME.modifiers.forced_joker_all = nil
     G.GAME.modifiers.forced_joker_pool = {}
 
-    G.GAME.modifiers.anaglyph = {} --be an array please i want you to be an array for me
+    G.GAME.modifiers.anaglyph = {} 
+
+    --BLINDS
+
+    G.GAME.modifiers.disable_small = false
 
     G.GAME.chdp_spacer = false
 
@@ -191,7 +185,7 @@ function Back:apply_to_run()
         {id = 'no_shop_jokers'}
     }
 
-    if (SMODS.Mods.Bunco or {}).can_load then --add this stuff
+    if (SMODS.Mods.Bunco or {}).can_load then --add bunco stuff
         local chaos_bunc_tags = {
             'bunc_breaking',
             'bunc_arcade',
@@ -220,8 +214,8 @@ function Back:apply_to_run()
         end
     end
 
-    if (SMODS.Mods.Cryptid or {}).can_load then
-        local cryptid_config = SMODS.load_mod_config({id = "Cryptid", path = SMODS.Mods.Cryptid.path}) -- cryptid config
+    if (SMODS.Mods.Cryptid or {}).can_load then -- check for cryptid, add chaos rules/tags
+        local cryptid_config = SMODS.load_mod_config({id = "Cryptid", path = SMODS.Mods.Cryptid.path}) -- add cryptid config
         if cryptid_config["Tags"] then
             local chaos_cry_tags = {
                 'cry_cat',
@@ -290,7 +284,7 @@ function Game:start_run(args)
             G.GAME.challenge_index = args.challenge
             if _ch.rules then
 
-                local anaglyphRules = {} --NEW ARRAY!!! :3
+                local anaglyphRules = {} --NEW ARRAY!!!
                 local disabledHands = {}
                 local disabledContaining = {}
                 if _ch.rules.custom then
@@ -467,7 +461,7 @@ function Game:start_run(args)
                     elseif v.id == 'enable_rental_jokers' then
                         G.GAME.modifiers.enable_rentals_in_shop = true
 
-                    elseif v.id == 'enable_singular_jokers' then --the dragon warrior... ITS ME!!!
+                    elseif v.id == 'enable_singular_jokers' then --challenger deep stickers
                         G.GAME.modifiers.enable_singulars_in_shop = true
                     elseif v.id == 'enable_shrouded_jokers' then
                         G.GAME.modifiers.enable_shroudeds_in_shop = true
@@ -477,6 +471,16 @@ function Game:start_run(args)
                     elseif v.id == 'enable_reactive_jokers' then
                         G.GAME.modifiers.enable_reactive_in_shop = true
                     elseif v.id == 'enable_hindered_jokers' then
+                        G.GAME.modifiers.enable_hindered_in_shop = true
+
+                    elseif v.id == 'enable_all_stickers' then -- enable every sticker
+                        G.GAME.modifiers.enable_eternals_in_shop = true
+                        G.GAME.modifiers.enable_perishables_in_shop = true
+                        G.GAME.modifiers.enable_rentals_in_shop = true
+                        G.GAME.modifiers.enable_singulars_in_shop = true
+                        G.GAME.modifiers.enable_shroudeds_in_shop = true
+                        G.GAME.modifiers.enable_scattering_in_shop = true
+                        G.GAME.modifiers.enable_reactive_in_shop = true
                         G.GAME.modifiers.enable_hindered_in_shop = true
 
                     elseif v.id == 'all_rental_jokers' then --every joker is rental
@@ -499,10 +503,10 @@ function Game:start_run(args)
                     elseif v.id == 'perishable_rounds' then --sets perishable rounds
                         G.GAME.perishable_rounds = v.value
                     
-                    elseif v.id == 'all_singular_jokers' then -- all jokers are MINE I DID THIS TO THEM
+                    elseif v.id == 'all_singular_jokers' then -- every joker is singular
                         G.GAME.modifiers.all_singular_jokers = true
 
-                    elseif v.id == 'all_shrouded_jokers' then -- all jokers are MINE I DID THIS TO THEM
+                    elseif v.id == 'all_shrouded_jokers' then -- every joker is shrouded etc.
                         G.GAME.modifiers.all_shrouded_jokers = true
 
                     elseif v.id == 'all_reactive_jokers' then
@@ -511,6 +515,7 @@ function Game:start_run(args)
                         G.GAME.modifiers.all_hindered_jokers = true
                     elseif v.id == 'all_scattering_jokers' then
                         G.GAME.modifiers.all_scattering_jokers = true
+
                         -- SHOP STUFF
 
                     elseif v.id == 'no_vouchers' then --no vouchers appear in shop (NOTE: BAN VOUCHER TAG)
@@ -537,13 +542,27 @@ function Game:start_run(args)
                     elseif v.id == 'anaglyph' then --creates tag with name 'value'
                         anaglyphRules[#anaglyphRules+1] = v.tag
                     
-                        -- WUMPUS AND CLYDE
+                        -- BLINDS
 
-                    elseif v.id == 'discord_suits' then --adds Wumpus and Clyde suits REQUIRES WUMPUS AND CLYDE
+                    elseif v.id == 'disable_small' then --disable small blinds
+                        G.GAME.modifiers.disable_small = true
+                        G.GAME.round_resets.blind_states["Small"] = "Hide"
+                    elseif v.id == 'disable_small_ante' then --disable small blinds at ante X
+                        G.GAME.modifiers.disable_small_ante = v.value
+
+                    elseif v.id == 'disable_big' then --disable big blinds
+                        G.GAME.modifiers.disable_big = true
+                        G.GAME.round_resets.blind_states["Big"] = "Hide"
+                    elseif v.id == 'disable_big_ante' then --disable big blinds at ante X
+                        G.GAME.modifiers.disable_big_ante = v.value
+                    
+                        -- WUMPUS AND CLYDE (DOES NOT FUNCTION AS WUMPUS AND CLYDE IS UNRELEASED)
+
+                    --[[elseif v.id == 'discord_suits' then --adds Wumpus and Clyde suits REQUIRES WUMPUS AND CLYDE
                         G.GAME.wumpandclyde = true
 		                local ranks = {'A','2','3','4','5','6','7','8','9','T','K','Q','J'}
 		                local suits = {'wump_CLYDE','wump_WUMPUS'}
-                        local cards = {}
+                        local cards = {}]]
 		
 		                G.E_MANAGER:add_event(Event({
 			                func = function()
@@ -1262,7 +1281,7 @@ SMODS.Sticker{
 }
 
 -- test challenge
-SMODS.Challenge{
+--[[SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
@@ -1286,10 +1305,8 @@ SMODS.Challenge{
         key = 'test_2',
         rules = {
             custom = {
-                {id = 'forced_joker_pool', pool = {
-                    'j_chicot',
-                    'j_egg'
-                }}
+                {id = 'disable_small'},
+                {id = 'disable_big'}
             },
             modifiers = {
             },
@@ -1332,6 +1349,4 @@ SMODS.Challenge{
             {id = 'all_hindered_jokers'}
         }
     }
-}
-----------------------------------------------
-------------MOD CODE END----------------------
+}]]

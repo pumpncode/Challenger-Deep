@@ -16,7 +16,7 @@ return {
             ch_c_no_holo_cards = {"{C:attention}Playing cards{} can no longer be {C:dark_edition}Holographic"},
             ch_c_no_holo_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Holographic"},
         
-            ch_c_no_negative_cards = {"are you magic?"},
+            ch_c_no_negative_cards = {"are you magic?"}, -- This should not be available. Has previously cropped up in Chaos runs
             ch_c_no_negative_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Negative"},
         
             ch_c_no_polychromes = {"{C:attention}Polychrome{} cards will no longer appear"},
@@ -78,11 +78,12 @@ return {
             ch_c_enable_eternal_jokers = {"{C:attention}Jokers{} can be {C:attention}Eternal"},
             ch_c_enable_rental_jokers = {"{C:attention}Jokers{} can be {C:attention}Rental"},
             ch_c_enable_perishable_jokers = {"{C:attention}Jokers{} can be {C:attention}Perishable"},
-            ch_c_enable_singular_jokers = {"{C:attention}Jokers{} can be {C:attention}Singular {C:inactive}(Challenger Deep)"}, --ME I DID THIS!!! MY STICKER
+            ch_c_enable_singular_jokers = {"{C:attention}Jokers{} can be {C:attention}Singular {C:inactive}(Challenger Deep)"},
             ch_c_enable_shrouded_jokers = {"{C:attention}Jokers{} can be {C:attention}Shrouded {C:inactive}(Challenger Deep)"},
             ch_c_enable_scattering_jokers = {"{C:attention}Jokers{} can be {C:attention}Scattering {C:inactive}(Bunco)"},
             ch_c_enable_reactive_jokers = {"{C:attention}Jokers{} can be {C:attention}Reactive {C:inactive}(Bunco)"},
             ch_c_enable_hindered_jokers = {"{C:attention}Jokers{} can be {C:attention}Hindered {C:inactive}(Bunco)"},
+            ch_c_enable_all_stickers = {"Every {C:attention}Joker Sticker{} is enabled"},
         
             ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental {C:inactive}(If compatible)"},
             ch_c_all_perishable_jokers = {"All {C:attention}Jokers{} are {C:attention}Perishable {C:inactive}(If compatible)"},
@@ -94,7 +95,7 @@ return {
 
             ch_c_rental_rate = {"{C:attention}Rental Jokers{} cost {C:money}$#1#{} per round"},
             ch_c_rental_rate_increase = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} per ante"},
-            ch_c_rental_rate_increase_all = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} every round"}, --I AM THE BALATRO LANDLORD
+            ch_c_rental_rate_increase_all = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} every round"},
 
             ch_c_perishable_rounds = {"{C:attention}Perishable Jokers{} are debuffed after #1# round(s)"},
 
@@ -123,9 +124,14 @@ return {
             ch_c_world_machine = {"The {C:dark_edition}World Machine{} is active. {C:inactive,S=0.5}(Enables a random Rule every Round)"},
             ch_c_anaglyph = {'Creates a {C:attention}#1#{} when Boss Blind is defeated'},
 
-            ch_c_discord_suits = {'{C:attention}Discord{} suits enabled {C:inactive}(Wumpus and Clyde)'},
+            ch_c_disable_small = {'No {C:attention}Small Blinds{} will appear'},
+            ch_c_disable_small_ante = {'{C:attention}Small Blinds{} will no longer appear after Ante {C:attention}#1#'},
+            ch_c_disable_big = {'No {C:attention}Big Blinds{} will appear'},
+            ch_c_disable_big_ante = {'{C:attention}Big Blinds{} will no longer appear after Ante {C:attention}#1#'},
 
-            ch_c_hidden = {"This challenge is {C:attention}Hidden"},
+            ch_c_discord_suits = {'{C:attention}Discord{} suits enabled {C:inactive}(Wumpus and Clyde)'}, --Unused (unreleased mod)
+
+            ch_c_hidden = {"This challenge is {C:attention}Hidden"}, --Can be used to hide a challenge. It will not count in the totals on the Challenge page.
             ch_c_dummy_rule = {"Dummy rule"}
         }
     }

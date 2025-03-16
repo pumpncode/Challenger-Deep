@@ -3,7 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
-# me ignoring the stickers
+# Jokers added at the start of a Challenge run will never have randomly assigned stickers??? I don't know why I did this.
 
 [[patches]]
 [patches.pattern]
