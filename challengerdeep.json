@@ -6,5 +6,5 @@
 	"description": "Adds 100+ Custom Rules to be used in Challenges.",
 	"prefix": "chdp",
 	"main_file": "challengerdeep.lua",
-	"version": "1.2.2"
+	"version": "1.2.21"
 }

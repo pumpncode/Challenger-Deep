@@ -125,6 +125,9 @@ function Back:apply_to_run()
     --BLINDS
 
     G.GAME.modifiers.disable_small = false
+    G.GAME.modifiers.disable_small_ante = -1
+    G.GAME.modifiers.disable_big = false
+    G.GAME.modifiers.disable_big_ante = -1
 
     G.GAME.chdp_spacer = false
 
@@ -462,9 +465,9 @@ function Game:start_run(args)
                         G.GAME.modifiers.enable_rentals_in_shop = true
 
                     elseif v.id == 'enable_singular_jokers' then --challenger deep stickers
-                        G.GAME.modifiers.enable_singulars_in_shop = true
+                        G.GAME.modifiers['enable_chdp_singular'] = true
                     elseif v.id == 'enable_shrouded_jokers' then
-                        G.GAME.modifiers.enable_shroudeds_in_shop = true
+                        G.GAME.modifiers['enable_chdp_shrouded'] = true
 
                     elseif v.id == 'enable_scattering_jokers' then --bunco time
                         G.GAME.modifiers.enable_scattering_in_shop = true
@@ -477,8 +480,8 @@ function Game:start_run(args)
                         G.GAME.modifiers.enable_eternals_in_shop = true
                         G.GAME.modifiers.enable_perishables_in_shop = true
                         G.GAME.modifiers.enable_rentals_in_shop = true
-                        G.GAME.modifiers.enable_singulars_in_shop = true
-                        G.GAME.modifiers.enable_shroudeds_in_shop = true
+                        G.GAME.modifiers['enable_chdp_singular'] = true
+                        G.GAME.modifiers['enable_chdp_shrouded'] = true
                         G.GAME.modifiers.enable_scattering_in_shop = true
                         G.GAME.modifiers.enable_reactive_in_shop = true
                         G.GAME.modifiers.enable_hindered_in_shop = true
@@ -785,6 +788,43 @@ function Game:start_run(args)
         G.GAME.current_round.voucher = nil
     end
     return result
+end
+
+local challenge_list_ref = G.UIDEF.challenge_list_page
+function G.UIDEF.challenge_list_page(_page)
+    local nonhidden_challenges = {}
+    for k, v in ipairs(G.CHALLENGES) do
+        if not v.hidden then
+            nonhidden_challenges[#nonhidden_challenges+1] = {
+                num = k, item = v
+            }
+        end
+    end
+    local snapped = false
+    local challenge_list = {}
+    for k, v in ipairs(nonhidden_challenges) do
+        if k > G.CHALLENGE_PAGE_SIZE*(_page or 0) and k <= G.CHALLENGE_PAGE_SIZE*((_page or 0) + 1) then
+            if G.CONTROLLER.focused.target and G.CONTROLLER.focused.target.config.id == 'challenge_page' then snapped = true end
+                local challenge_completed =  G.PROFILES[G.SETTINGS.profile].challenge_progress.completed[v.item.id or '']
+                local challenge_unlocked = G.PROFILES[G.SETTINGS.profile].challenges_unlocked and (G.PROFILES[G.SETTINGS.profile].challenges_unlocked >= v.num)
+
+                challenge_list[#challenge_list+1] = 
+                {n=G.UIT.R, config={align = "cm"}, nodes={
+                    {n=G.UIT.C, config={align = 'cl', minw = 0.8}, nodes = {
+                        {n=G.UIT.T, config={text = k..'', scale = 0.4, colour = G.C.WHITE}},
+                    }},
+                    UIBox_button({id = v.num, col = true, label = {challenge_unlocked and localize(v.item.id, 'challenge_names') or localize('k_locked'),}, button = challenge_unlocked and 'change_challenge_description' or 'nil', colour = challenge_unlocked and G.C.RED or G.C.GREY, minw = 4, scale = 0.4, minh = 0.6, focus_args = {snap_to = not snapped}}),
+                    {n=G.UIT.C, config={align = 'cm', padding = 0.05, minw = 0.6}, nodes = {
+                        {n=G.UIT.C, config={minh = 0.4, minw = 0.4, emboss = 0.05, r = 0.1, colour = challenge_completed and G.C.GREEN or G.C.BLACK}, nodes = {
+                            challenge_completed and {n=G.UIT.O, config={object = Sprite(0,0,0.4,0.4, G.ASSET_ATLAS["icons"], {x=1, y=0})}} or nil
+                        }},
+                    }},
+                }}      
+            snapped = true
+        end
+    end
+
+    return {n=G.UIT.ROOT, config={align = "cm", padding = 0.1, colour = G.C.CLEAR}, nodes=challenge_list}
 end
 
 local get_next_voucher_key_ref = get_next_voucher_key
@@ -1248,12 +1288,11 @@ SMODS.Sticker{
             'be duplicated'
         }
     },
-
-    apply = function(self, card, val)
-        card.ability[self.key] = val
-    end,
-
-    order = 8,
+    sets = {
+        Joker = true
+    },
+    rate = 0.7,
+    needs_enable_flag = true,
     badge_colour = HEX('583876'),
     atlas = 'chdpstickers',
     pos = {x = 0, y = 0}
@@ -1269,12 +1308,11 @@ SMODS.Sticker{
             'cannot be unflipped'
         }
     },
-
-    apply = function(self, card, val)
-        card.ability[self.key] = val
-    end,
-
-    order = 9,
+    sets = {
+        Joker = true
+    },
+    rate = 0.5,
+    needs_enable_flag = true,
     badge_colour = HEX('54575c'),
     atlas = 'chdpstickers',
     pos = {x = 1, y = 0}
