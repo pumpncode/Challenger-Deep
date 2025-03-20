@@ -271,6 +271,12 @@ function Back:apply_to_run()
             end
         end
     end
+
+    if (SMODS.Mods["Talisman"] or {}).can_load then --talisman is here
+        G.GAME.modifiers.chdp_talisman_check = true
+        print("STAND READY FOR MY ARRIVAL, COMPUTER.")
+    end
+
     G.GAME.chaos_editions_jokers = G.GAME.chaos_editions
     G.GAME.chaos_editions_cards = G.GAME.chaos_editions
     G.GAME.chaos_editions_jokers[#G.GAME.chaos_editions_jokers+1] = 'negative'
@@ -1319,12 +1325,12 @@ SMODS.Sticker{
 }
 
 -- test challenge
---[[SMODS.Challenge{
+SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
         custom = {
-            {id = 'chaos_engine_all'}
+            {id = 'chaos_engine_skip'}
     },
         modifiers = {
         },
@@ -1338,7 +1344,7 @@ SMODS.Sticker{
     },
 }
 
-    SMODS.Challenge{
+--[[ SMODS.Challenge{
         loc_txt = "Test 2",
         key = 'test_2',
         rules = {

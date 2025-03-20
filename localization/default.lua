@@ -16,7 +16,7 @@ return {
             ch_c_no_holo_cards = {"{C:attention}Playing cards{} can no longer be {C:dark_edition}Holographic"},
             ch_c_no_holo_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Holographic"},
         
-            ch_c_no_negative_cards = {"are you magic?"}, -- This should not be available. Has previously cropped up in Chaos runs
+            ch_c_no_negative_cards = {"{C:attention}Negative{} cards will no longer appear"},
             ch_c_no_negative_jokers = {"{C:attention}Jokers{} can no longer be {C:dark_edition}Negative"},
         
             ch_c_no_polychromes = {"{C:attention}Polychrome{} cards will no longer appear"},
@@ -121,6 +121,7 @@ return {
 
             ch_c_chaos_engine = {"{C:red}Chaos {C:inactive,S=0.5}(Enables a random Rule every Ante)"},
             ch_c_chaos_engine_all = {"{C:red}Chaos {C:inactive,S=0.5}(Enables a random Rule every Round)"},
+            ch_c_chaos_engine_skip = {"Skipping a Blind enables a random {C:red}Rule"},
             ch_c_world_machine = {"The {C:dark_edition}World Machine{} is active. {C:inactive,S=0.5}(Enables a random Rule every Round)"},
             ch_c_anaglyph = {'Creates a {C:attention}#1#{} when Boss Blind is defeated'},
 

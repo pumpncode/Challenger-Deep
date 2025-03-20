@@ -5,6 +5,7 @@
 	"author": ["Opal"],
 	"description": "Adds 100+ Custom Rules to be used in Challenges.",
 	"prefix": "chdp",
+	"priority": 10,
 	"main_file": "challengerdeep.lua",
-	"version": "1.2.21"
+	"version": "1.2.3"
 }
