@@ -274,7 +274,6 @@ function Back:apply_to_run()
 
     if (SMODS.Mods["Talisman"] or {}).can_load then --talisman is here
         G.GAME.modifiers.chdp_talisman_check = true
-        print("STAND READY FOR MY ARRIVAL, COMPUTER.")
     end
 
     G.GAME.chaos_editions_jokers = G.GAME.chaos_editions
@@ -813,13 +812,20 @@ function G.UIDEF.challenge_list_page(_page)
             if G.CONTROLLER.focused.target and G.CONTROLLER.focused.target.config.id == 'challenge_page' then snapped = true end
                 local challenge_completed =  G.PROFILES[G.SETTINGS.profile].challenge_progress.completed[v.item.id or '']
                 local challenge_unlocked = G.PROFILES[G.SETTINGS.profile].challenges_unlocked and (G.PROFILES[G.SETTINGS.profile].challenges_unlocked >= v.num)
-
+                local challenge_color = G.C.RED
+                if v.item.rules and v.item.rules.custom then
+                    for i, j in ipairs(v.item.rules.custom) do
+                        if j.id == 'color' then
+                            challenge_color = G.C[j.value]
+                        end
+                    end
+                end
                 challenge_list[#challenge_list+1] = 
                 {n=G.UIT.R, config={align = "cm"}, nodes={
                     {n=G.UIT.C, config={align = 'cl', minw = 0.8}, nodes = {
                         {n=G.UIT.T, config={text = k..'', scale = 0.4, colour = G.C.WHITE}},
                     }},
-                    UIBox_button({id = v.num, col = true, label = {challenge_unlocked and localize(v.item.id, 'challenge_names') or localize('k_locked'),}, button = challenge_unlocked and 'change_challenge_description' or 'nil', colour = challenge_unlocked and G.C.RED or G.C.GREY, minw = 4, scale = 0.4, minh = 0.6, focus_args = {snap_to = not snapped}}),
+                    UIBox_button({id = v.num, col = true, label = {challenge_unlocked and localize(v.item.id, 'challenge_names') or localize('k_locked'),}, button = challenge_unlocked and 'change_challenge_description' or 'nil', colour = challenge_unlocked and (challenge_color) or G.C.GREY, minw = 4, scale = 0.4, minh = 0.6, focus_args = {snap_to = not snapped}}),
                     {n=G.UIT.C, config={align = 'cm', padding = 0.05, minw = 0.6}, nodes = {
                         {n=G.UIT.C, config={minh = 0.4, minw = 0.4, emboss = 0.05, r = 0.1, colour = challenge_completed and G.C.GREEN or G.C.BLACK}, nodes = {
                             challenge_completed and {n=G.UIT.O, config={object = Sprite(0,0,0.4,0.4, G.ASSET_ATLAS["icons"], {x=1, y=0})}} or nil
@@ -1123,26 +1129,32 @@ function CardArea:update(dt)
         if G.GAME.modifiers.minus_jokers_per_dollar then
         if G.GAME.modifiers.minus_jokers_per_dollar > 0 then
             self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
-            if math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk then
-                if math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
+            if (SMODS.Mods["Talisman"] or {}).can_load and (math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk) or 
+            math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk then
+                if (SMODS.Mods["Talisman"] or {}).can_load and (to_number(to_big(G.GAME.dollars))/(G.GAME.modifiers.minus_jokers_per_dollar) <= G.GAME.starting_params.joker_slots) then 
+                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots - math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar)
+                elseif not((SMODS.Mods["Talisman"] or {}).can_load) and G.GAME.dollars/(G.GAME.modifiers.minus_jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
                     G.jokers.config.card_limit = G.GAME.starting_params.joker_slots - math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
                 else
                     G.jokers.config.card_limit = 0
                 end
-                self.config.last_poll_size_jk = math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
+                self.config.last_poll_size_jk = math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar)
             end
         end
         end
         if G.GAME.modifiers.jokers_per_dollar then
             if G.GAME.modifiers.jokers_per_dollar > 0 then
             self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
-            if math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) ~= self.config.last_poll_size_jk then
-                if math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
+            if (SMODS.Mods["Talisman"] or {}).can_load and math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar) ~= self.config.last_poll_size_jk or
+            math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) ~= self.config.last_poll_size_jk then
+                if (SMODS.Mods["Talisman"] or {}).can_load and math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
+                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots + math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar)
+                elseif not((SMODS.Mods["Talisman"] or {}).can_load) and math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
                     G.jokers.config.card_limit = G.GAME.starting_params.joker_slots + math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar)
                 else
                     G.jokers.config.card_limit = 0
                 end
-                self.config.last_poll_size_jk = math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar)
+                self.config.last_poll_size_jk = math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar)
                 if G.jokers.config.card_limit < 0 then
                     G.jokers.config.card_limit = 0
                 end

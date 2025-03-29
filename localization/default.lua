@@ -67,7 +67,7 @@ return {
             ch_c_money_scaling = {"All {C:attention}Blind rewards{} are multiplied by {C:red}X#1#"},
 
             ch_c_minus_jokers_per_dollar = {"Hold {C:red}-1{} Joker for every {C:money}$#1#{} you have"},
-            ch_c_joker_per_dollar = {"Hold {C:blue}+1{} Joker for every {C:money}$#1#{} you have"},
+            ch_c_jokers_per_dollar = {"Hold {C:blue}+1{} Joker for every {C:money}$#1#{} you have"},
             ch_c_overflow_perishable = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Perishable"},
             ch_c_overflow_debuff = {"If you have more {C:attention}Jokers{} than {C:attention}Joker slots{}, all Jokers become {C:red}Debuffed"},
             ch_c_overflow_debuff_one = {"For each {C:attention}Joker{} over max {C:attention}Joker Slots{}, {C:red}debuff{} a Joker"},
