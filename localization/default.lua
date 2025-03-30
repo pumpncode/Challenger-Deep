@@ -129,6 +129,10 @@ return {
             ch_c_disable_small_ante = {'{C:attention}Small Blinds{} will no longer appear after Ante {C:attention}#1#'},
             ch_c_disable_big = {'No {C:attention}Big Blinds{} will appear'},
             ch_c_disable_big_ante = {'{C:attention}Big Blinds{} will no longer appear after Ante {C:attention}#1#'},
+            ch_c_second_boss = {'Antes have {C:attention}Two Boss Blinds'},
+            ch_c_second_boss_ante = {'2 {C:attention}Boss Blinds{} will appear each Ante, starting Ante {C:attention}#1#'},
+            ch_c_disable_skipping = {"{C:attention}Skipping Blinds{} is {C:red}disabled"},
+            ch_c_disable_skipping_ante = {"{C:attention}Skipping Blinds{} is {C:red}disabled{} after Ante {C:attention}#1#"},
 
             ch_c_discord_suits = {'{C:attention}Discord{} suits enabled {C:inactive}(Wumpus and Clyde)'}, --Unused (unreleased mod)
 

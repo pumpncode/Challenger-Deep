@@ -128,6 +128,12 @@ function Back:apply_to_run()
     G.GAME.modifiers.disable_small_ante = -1
     G.GAME.modifiers.disable_big = false
     G.GAME.modifiers.disable_big_ante = -1
+    G.GAME.modifiers.second_boss = false
+    G.GAME.modifiers.second_boss_ante = -1
+    G.GAME.last_chdp_blind = nil
+
+    G.GAME.modifiers.disable_skipping = false
+    G.GAME.modifiers.disable_skipping_ante = -1
 
     G.GAME.chdp_spacer = false
 
@@ -563,6 +569,19 @@ function Game:start_run(args)
                         G.GAME.round_resets.blind_states["Big"] = "Hide"
                     elseif v.id == 'disable_big_ante' then --disable big blinds at ante X
                         G.GAME.modifiers.disable_big_ante = v.value
+
+                    elseif v.id == 'second_boss' then --add another blind
+                        G.GAME.modifiers.second_boss = true
+                        G.GAME.round_resets.blind_choices.ChDp_Boss = get_new_boss()
+                        G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss
+                    elseif v.id == 'second_boss_ante' then --add another blind at ante X
+                        G.GAME.modifiers.second_boss_ante = v.value
+                        print(G.GAME.modifiers.second_boss_ante)
+
+                    elseif v.id == 'disable_skipping' then --disable skipping
+                        G.GAME.modifiers.disable_skipping = true
+                    elseif v.id == 'disable_skipping_ante' then --disable skipping at ante X
+                        G.GAME.modifiers.disable_skipping_ante = v.value
                     
                         -- WUMPUS AND CLYDE (DOES NOT FUNCTION AS WUMPUS AND CLYDE IS UNRELEASED)
 
@@ -570,7 +589,7 @@ function Game:start_run(args)
                         G.GAME.wumpandclyde = true
 		                local ranks = {'A','2','3','4','5','6','7','8','9','T','K','Q','J'}
 		                local suits = {'wump_CLYDE','wump_WUMPUS'}
-                        local cards = {}]]
+                        local cards = {}
 		
 		                G.E_MANAGER:add_event(Event({
 			                func = function()
@@ -581,7 +600,7 @@ function Game:start_run(args)
 				                end
 				                return true
 			                end
-		                }))
+		                }))]]
 
                         -- MISCELLANEOUS
 
@@ -837,6 +856,17 @@ function G.UIDEF.challenge_list_page(_page)
     end
 
     return {n=G.UIT.ROOT, config={align = "cm", padding = 0.1, colour = G.C.CLEAR}, nodes=challenge_list}
+end
+
+local end_round_ref = end_round
+function end_round()
+    if (G.GAME.round_resets.ante + 1) == G.GAME.modifiers.second_boss_ante and G.GAME.blind:get_type() == 'Boss' then
+        G.GAME.modifiers.second_boss = true
+        G.GAME.round_resets.blind_choices.ChDp_Boss = get_new_boss()
+        G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss
+        G.GAME.round_resets.blind_states.ChDp_Boss = 'Upcoming'
+    end
+    return end_round_ref()
 end
 
 local get_next_voucher_key_ref = get_next_voucher_key
