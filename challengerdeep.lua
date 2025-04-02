@@ -79,6 +79,7 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.disable_hand = {}
     G.GAME.modifiers.disable_hand_containing = {}
+    G.GAME.modifiers.whitelist_hand = {}
 
     --JOKER FUN
 
@@ -301,6 +302,7 @@ function Game:start_run(args)
                 local anaglyphRules = {} --NEW ARRAY!!!
                 local disabledHands = {}
                 local disabledContaining = {}
+                local whitelistedHands = {}
                 if _ch.rules.custom then
                     for k, v in ipairs(_ch.rules.custom)do
 
@@ -446,6 +448,9 @@ function Game:start_run(args)
 
                     elseif v.id == 'disable_hand_containing' then --hands with this in them are not allowed
                         disabledContaining[#disabledContaining+1] = v.hand
+
+                    elseif v.id == 'whitelist_hand' then --hand is not allowed
+                        whitelistedHands[#whitelistedHands+1] = v.hand
                     
                         -- JOKER FUN
 
@@ -574,9 +579,10 @@ function Game:start_run(args)
                         G.GAME.modifiers.second_boss = true
                         G.GAME.round_resets.blind_choices.ChDp_Boss = get_new_boss()
                         G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss
+                        G.GAME.round_resets.blind_states.ChDp_Boss = 'Upcoming'
+
                     elseif v.id == 'second_boss_ante' then --add another blind at ante X
                         G.GAME.modifiers.second_boss_ante = v.value
-                        print(G.GAME.modifiers.second_boss_ante)
 
                     elseif v.id == 'disable_skipping' then --disable skipping
                         G.GAME.modifiers.disable_skipping = true
@@ -805,6 +811,7 @@ function Game:start_run(args)
                 G.GAME.modifiers.anaglyph = anaglyphRules
                 G.GAME.modifiers.disable_hand = disabledHands
                 G.GAME.modifiers.disable_hand_containing = disabledContaining
+                G.GAME.modifiers.whitelist_hand = whitelistedHands
             end
         end
     end
@@ -1307,6 +1314,15 @@ end
 local debuff_hand_ref = Blind.debuff_hand
 function Blind:debuff_hand(cards, hand, handname, check)
     local result = debuff_hand_ref(self,cards, hand, handname, check)
+    local whitelist = true
+    if G.GAME.modifiers.whitelist_hand then
+        for k, v in ipairs(G.GAME.modifiers.whitelist_hand) do
+            if handname == v then
+                whitelist = false
+            end
+        end
+        return whitelist
+    end
     if G.GAME.modifiers.disable_hand then
         for k, v in ipairs(G.GAME.modifiers.disable_hand) do
             if handname == v then

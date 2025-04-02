@@ -103,6 +103,7 @@ return {
 
             ch_c_disable_hand = {"{C:attention}#1#{} Hands are not allowed"},
             ch_c_disable_hand_containing = {"Hands containing a {C:attention}#1#{} are not allowed"},
+            ch_c_whitelist_hand = {"{C:attention}#1#{} Hands are whitelisted. {C:inactive,S=0.5}(Only whitelisted Hands are allowed)"},
 
             ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
             ch_c_extra_hand_money_scaling = {"Extra {C:blue}Hand{} money is multiplied by {C:red}X#1#"},
