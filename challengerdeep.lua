@@ -1315,7 +1315,7 @@ local debuff_hand_ref = Blind.debuff_hand
 function Blind:debuff_hand(cards, hand, handname, check)
     local result = debuff_hand_ref(self,cards, hand, handname, check)
     local whitelist = true
-    if G.GAME.modifiers.whitelist_hand then
+    if G.GAME.modifiers.whitelist_hand and #G.GAME.modifiers.whitelist_hand > 0 then
         for k, v in ipairs(G.GAME.modifiers.whitelist_hand) do
             if handname == v then
                 whitelist = false
