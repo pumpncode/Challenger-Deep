@@ -130,6 +130,58 @@ payload = """G.GAME.round_resets.blind_states.ChDp_Boss = G.GAME.modifiers.secon
 G.GAME.round_resets.blind_choices.ChDp_Boss = get_new_boss()
 G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss"""
 
+# stop stuff detecting the first boss as THE boss blind (using check G.GAME.last_blind.boss)
+[[patches]]
+[patches.pattern]
+target = "blind.lua"
+pattern = "self.boss = blind and not not blind.boss"
+position = "after"
+match_indent = true
+payload = """
+if G.GAME.round_resets.blind and G.GAME.round_resets.blind.key == G.GAME.last_chdp_blind then
+    self.boss = false
+end"""
+
+#
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "G.prev_large_state = G.GAME.round_resets.blind_states.Big"
+position = "after"
+match_indent = true
+payload = "G.prev_chdp_state = G.GAME.round_resets.blind_states.ChDp_Boss"
+
+#
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "G.GAME.round_resets.loc_blind_states.Big = localize(G.GAME.round_resets.blind_states.Big,'blind_states')"
+position = "after"
+match_indent = true
+payload = "G.GAME.round_resets.loc_blind_states.ChDp_Boss = G.GAME.modifiers.second_boss and localize(G.GAME.round_resets.blind_states.ChDp_Boss,'blind_states')"
+
+#
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = "G.GAME.subhash = (G.GAME.round_resets.ante)..(blhash)"
+position = "before"
+match_indent = true
+payload = """if G.GAME.last_chdp_blind == G.GAME.round_resets.blind.key then
+    G.GAME.round_resets.blind_states.ChDp_Boss = 'Current'
+G.GAME.round_resets.blind_states.Boss = 'Upcoming'
+end"""
+
+#
+[[patches]]
+[patches.pattern]
+target = "blind.lua"
+pattern = "elseif self.name and self.name ~= '' then"
+position = "before"
+match_indent = true
+payload = """elseif G.GAME.round_resets.blind_states.Boss == 'Upcoming' then
+    return 'ChDp_Boss'"""
+
 # disable skipping blinds
 [[patches]]
 [patches.pattern]
