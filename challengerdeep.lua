@@ -79,7 +79,6 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.disable_hand = {}
     G.GAME.modifiers.disable_hand_containing = {}
-    G.GAME.modifiers.whitelist_hand = {}
 
     --JOKER FUN
 
@@ -450,6 +449,7 @@ function Game:start_run(args)
                         disabledContaining[#disabledContaining+1] = v.hand
 
                     elseif v.id == 'whitelist_hand' then --hand is not allowed
+                        whitelistedHands = whitelistedHands or {}
                         whitelistedHands[#whitelistedHands+1] = v.hand
                     
                         -- JOKER FUN
