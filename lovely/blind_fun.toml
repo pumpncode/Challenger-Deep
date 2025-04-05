@@ -190,3 +190,25 @@ pattern = "if not G.GAME.round_resets.blind_tags[blind_choice] then return nil e
 position = "at"
 match_indent = true
 payload = "if G.GAME.modifiers.disable_skipping or not G.GAME.round_resets.blind_tags[blind_choice] then return nil end"
+
+# show second boss in Next Ante Preview
+[[patches]]
+[patches.pattern]
+target = '=[SMODS AntePreview "main.lua]'
+pattern = 'for _, choice in ipairs({ "Small", "Big", "Boss" }) do'
+position = "at"
+match_indent = true
+payload = 'for _, choice in ipairs({ "Small", "Big", "ChDp_Boss", "Boss" }) do'
+
+# second boss has higher scoring requirements
+[[patches]]
+[patches.pattern]
+target = '=[SMODS AntePreview "main.lua]'
+pattern = "local tag = prediction[choice].tag"
+position = "before"
+match_indent = true
+payload = '''
+if G.GAME.modifiers.second_boss and choice == "Boss" then
+    blind_amt = blind_amt * 1.5
+end
+'''
