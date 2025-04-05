@@ -1294,6 +1294,15 @@ function CardArea:update(dt)
     return result
 end
 
+function Card:set_rental(_rental)
+    self.ability.rental = _rental
+    if not G.GAME.modifiers.rentals_keep_price then
+        self:set_cost()
+    end
+end
+
+-- BLIND.LUA HOOKS
+
 local set_blind_ref = Blind.set_blind
 function Blind:set_blind(blind, reset, silent)
     local result = set_blind_ref(self, blind, reset, silent)
@@ -1312,13 +1321,6 @@ function Blind:debuff_card(card, from_blind)
     return result
 end
 
-function Card:set_rental(_rental)
-    self.ability.rental = _rental
-    if not G.GAME.modifiers.rentals_keep_price then
-        self:set_cost()
-    end
-end
-
 local debuff_hand_ref = Blind.debuff_hand
 function Blind:debuff_hand(cards, hand, handname, check)
     local result = debuff_hand_ref(self,cards, hand, handname, check)
@@ -1334,6 +1336,7 @@ function Blind:debuff_hand(cards, hand, handname, check)
     if G.GAME.modifiers.disable_hand then
         for k, v in ipairs(G.GAME.modifiers.disable_hand) do
             if handname == v then
+                G.GAME.hand_to_disable = v
                 return true
             end
         end
@@ -1346,6 +1349,137 @@ function Blind:debuff_hand(cards, hand, handname, check)
         end
     end
     return result
+end
+
+local debuff_text_ref = Blind.get_loc_debuff_text
+function Blind:get_loc_debuff_text()
+    local hand = G.GAME.current_round.current_hand.handname
+        if G.GAME.hand_to_disable then
+            return localize('chdp_debuff_hand')
+        end
+    result = debuff_text_ref(self)
+    return result
+end
+
+-- COMPAT - Next Ante Preview
+
+function predict_next_ante()
+    local small_tag = get_next_tag_key()
+    local big_tag = get_next_tag_key()
+    local chdp_boss = get_new_boss()
+    local boss = get_new_boss()
+    G.GAME.bosses_used[chdp_boss] = G.GAME.bosses_used[chdp_boss] - 1
+    G.GAME.bosses_used[boss] = G.GAME.bosses_used[boss] - 1
+    return { Small = { blind = "bl_small", tag = small_tag }, Big = { blind = "bl_big", tag = big_tag }, ChDp_Boss = { blind = chdp_boss}, Boss = { blind = boss } }
+end
+
+function create_ante_preview()
+    G.round_eval:get_UIE_by_ID("next_ante_preview").children = {}
+    local prediction = predict_next_ante()
+    for _, choice in ipairs({ "Small", "Big", "ChDp_Boss", "Boss" }) do
+        if prediction[choice] then
+            local blind = G.P_BLINDS[prediction[choice].blind]
+            print(blind.name)
+            local blind_sprite = AnimatedSprite(0, 0, 1, 1,
+                G.ANIMATION_ATLAS[blind.atlas] or G.ANIMATION_ATLAS.blind_chips, blind.pos)
+            blind_sprite:define_draw_steps({ { shader = 'dissolve', shadow_height = 0.05 }, { shader = 'dissolve' } })
+            blind_sprite.float = true
+            blind_sprite.states.hover.can = true
+            blind_sprite.states.drag.can = false
+            blind_sprite.states.collide.can = true
+            blind_sprite.config = { blind = blind, force_focus = true }
+            blind_sprite.hover = function()
+                if not G.CONTROLLER.dragging.target or G.CONTROLLER.using_touch then
+                    if not blind_sprite.hovering and blind_sprite.states.visible then
+                        blind_sprite.hovering = true
+                        blind_sprite.hover_tilt = 3
+                        blind_sprite:juice_up(0.05, 0.02)
+                        play_sound('chips1', math.random() * 0.1 + 0.55, 0.12)
+                        local vars = blind.vars
+                        if blind.loc_vars then
+                            local locvars_return = blind:loc_vars()
+                            vars = locvars_return and locvars_return.vars or vars
+                        end
+                        blind_sprite.config.h_popup = create_UIBox_blind_popup(blind, blind.discovered, vars)
+                        blind_sprite.config.h_popup_config = {
+                            align = 'cl',
+                            offset = { x = -0.1, y = 0 },
+                            parent = blind_sprite
+                        }
+                        Node.hover(blind_sprite)
+                    end
+                end
+                blind_sprite.stop_hover = function()
+                    blind_sprite.hovering = false; Node.stop_hover(blind_sprite)
+                    blind_sprite.hover_tilt = 0
+                end
+            end
+            local blind_preview_ui = SMODS.Mods.AntePreview.config.custom_UI and blind.preview_ui and blind:preview_ui()
+                or nil
+            local blind_amt = get_blind_amount(G.GAME.round_resets.blind_ante + 1)
+                * blind.mult * G.GAME.starting_params.ante_scaling * (choice == 'Boss' and 1.5 or 1)
+            local tag = prediction[choice].tag
+            local tag_sprite
+            local tag_preview_ui
+            if tag then
+                local tag_object
+                local hands = {} -- Orbital tag is weird as hell
+                for k, v in pairs(G.GAME.hands) do
+                    if v.visible then table.insert(hands, k) end
+                end
+                G.orbital_hand = pseudorandom_element(hands, pseudoseed('orbital'))
+                tag_object = Tag(tag, nil, choice)
+                G.orbital_hand = nil
+                _, tag_sprite = tag_object:generate_UI(0.4)
+                tag_preview_ui = SMODS.Mods.AntePreview.config.custom_UI and G.P_TAGS[tag].preview_ui and
+                    G.P_TAGS[tag]:preview_ui(tag_object) or nil
+            end
+            G.round_eval:add_child({
+                    n = G.UIT.C,
+                    nodes = { {
+                        n = G.UIT.R,
+                        nodes = {
+                            {
+                                n = G.UIT.C,
+                                config = { maxw = 1 },
+                                nodes = {
+                                    { n = G.UIT.R, nodes = { { n = G.UIT.O, config = { object = blind_sprite } } } },
+                                    blind_preview_ui and
+                                    { n = G.UIT.R, config = { align = "tm" }, nodes = { blind_preview_ui } },
+                                }
+                            },
+                            {
+                                n = G.UIT.C,
+                                nodes = {
+                                    {
+                                        n = G.UIT.R,
+                                        config = { align = "cl" },
+                                        nodes = {
+                                            { n = G.UIT.O, config = { object = get_stake_sprite(G.GAME.stake, 0.4) } },
+                                            { n = G.UIT.T, config = { text = number_format(blind_amt), colour = G.C.RED, scale = score_number_scale(0.8, blind_amt) } }
+                                        }
+                                    },
+                                    tag and {
+                                        n = G.UIT.R,
+                                        config = { align = "cl" },
+                                        nodes = {
+                                            { n = G.UIT.T, config = { text = localize("ph_or_sp"), colour = G.C.UI.TEXT_LIGHT, scale = 0.4 } },
+                                            { n = G.UIT.O, config = { id = "tag_sprite", object = tag_sprite } },
+                                            tag_preview_ui,
+                                        }
+                                    },
+                                },
+                            },
+                        }
+                    } }
+                },
+                G.round_eval:get_UIE_by_ID("next_ante_preview"))
+            if choice ~= "Boss" then
+                G.round_eval:add_child({ n = G.UIT.B, config = { w = 0.25, h = 0 } },
+                    G.round_eval:get_UIE_by_ID("next_ante_preview"))
+            end
+        end
+    end
 end
 
 --HAVE A STICKER
@@ -1390,7 +1524,7 @@ SMODS.Sticker{
     pos = {x = 1, y = 0}
 }
 
--- test challenge
+--[[ test challenge
 SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
@@ -1410,7 +1544,7 @@ SMODS.Challenge{
     },
 }
 
---[[ SMODS.Challenge{
+-- SMODS.Challenge{
         loc_txt = "Test 2",
         key = 'test_2',
         rules = {

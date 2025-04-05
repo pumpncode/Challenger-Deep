@@ -37,7 +37,7 @@ target = "functions/UI_definitions.lua"
 pattern = "not (G.GAME.round_resets.blind_states.Big == 'Defeated' or G.GAME.round_resets.blind_states.Big == 'Skipped'or G.GAME.round_resets.blind_states.Big == 'Hide') and 'Big' or "
 position = "after"
 match_indent = true
-payload = "G.GAME.modifiers.second_boss and not (G.GAME.round_resets.blind_states.ChDp_Boss == 'Defeated' or G.GAME.round_resets.blind_states.ChDp_Boss == 'Skipped'or G.GAME.round_resets.blind_states.ChDp_Boss == 'Hide') and 'ChDp_Boss' or "
+payload = "not (G.GAME.round_resets.blind_states.ChDp_Boss == 'Defeated' or G.GAME.round_resets.blind_states.ChDp_Boss == 'Skipped'or G.GAME.round_resets.blind_states.ChDp_Boss == 'Hide') and 'ChDp_Boss' or "
 
 # more UI stuff - sets second boss
 [[patches]]
@@ -160,7 +160,7 @@ position = "after"
 match_indent = true
 payload = "G.GAME.round_resets.loc_blind_states.ChDp_Boss = G.GAME.modifiers.second_boss and localize(G.GAME.round_resets.blind_states.ChDp_Boss,'blind_states')"
 
-#
+# 
 [[patches]]
 [patches.pattern]
 target = "functions/state_events.lua"
@@ -172,7 +172,7 @@ payload = """if G.GAME.last_chdp_blind == G.GAME.round_resets.blind.key then
 G.GAME.round_resets.blind_states.Boss = 'Upcoming'
 end"""
 
-#
+# appear please
 [[patches]]
 [patches.pattern]
 target = "blind.lua"

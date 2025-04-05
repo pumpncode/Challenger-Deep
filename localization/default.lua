@@ -1,7 +1,8 @@
 return {
     misc = {
         dictionary = {
-            b_rules = 'Rules'
+            b_rules = 'Rules',
+            chdp_debuff_hand = ' This Hand is Debuffed'
         },
         v_text = {
             ch_c_no_editions = {"Cards with {C:attention}Editions{} will no longer appear"},
@@ -103,7 +104,8 @@ return {
 
             ch_c_disable_hand = {"{C:attention}#1#{} Hands are not allowed"},
             ch_c_disable_hand_containing = {"Hands containing a {C:attention}#1#{} are not allowed"},
-            ch_c_whitelist_hand = {"{C:attention}#1#{} Hands are whitelisted. {C:inactive,S=0.5}(Only whitelisted Hands are allowed)"},
+            ch_c_whitelist_hand = {"{C:attention}#1#{} Hands are whitelisted"},
+            ch_c_whitelist_info = {"{C:inactive,S=0.5}Hands that are not whitelisted are {C:red,S=0.5}Disallowed{}"},
 
             ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
             ch_c_extra_hand_money_scaling = {"Extra {C:blue}Hand{} money is multiplied by {C:red}X#1#"},
@@ -132,6 +134,7 @@ return {
             ch_c_disable_big_ante = {'{C:attention}Big Blinds{} will no longer appear after Ante {C:attention}#1#'},
             ch_c_second_boss = {'Antes have {C:attention}Two Boss Blinds'},
             ch_c_second_boss_ante = {'2 {C:attention}Boss Blinds{} will appear each Ante, starting Ante {C:attention}#1#'},
+            ch_c_second_boss_until = {'2 {C:attention}Boss Blinds{} will appear each Ante, ending Ante {C:attention}#1#'},
             ch_c_disable_skipping = {"{C:attention}Skipping Blinds{} is {C:red}disabled"},
             ch_c_disable_skipping_ante = {"{C:attention}Skipping Blinds{} is {C:red}disabled{} after Ante {C:attention}#1#"},
 
