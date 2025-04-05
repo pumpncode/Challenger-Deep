@@ -191,24 +191,51 @@ position = "at"
 match_indent = true
 payload = "if G.GAME.modifiers.disable_skipping or not G.GAME.round_resets.blind_tags[blind_choice] then return nil end"
 
-# show second boss in Next Ante Preview
+# Next Ante Preview compatibility 1/
 [[patches]]
 [patches.pattern]
-target = '=[SMODS AntePreview "main.lua]'
-pattern = 'for _, choice in ipairs({ "Small", "Big", "Boss" }) do'
+target = '=[SMODS AntePreview "main.lua"]'
+pattern = '''for _, choice in ipairs({ "Small", "Big", "Boss" }) do'''
 position = "at"
 match_indent = true
-payload = 'for _, choice in ipairs({ "Small", "Big", "ChDp_Boss", "Boss" }) do'
+payload = '''local blinds = G.GAME.modifiers.second_boss and {"Small","Big","ChDp_Boss","Boss"} or {"Small","Big","Boss"}
+for _, choice in ipairs(blinds) do'''
 
-# second boss has higher scoring requirements
+# NAP compat 2/
 [[patches]]
 [patches.pattern]
-target = '=[SMODS AntePreview "main.lua]'
-pattern = "local tag = prediction[choice].tag"
+target = '=[SMODS AntePreview "main.lua"]'
+pattern = '''local boss = get_new_boss()'''
 position = "before"
 match_indent = true
-payload = '''
-if G.GAME.modifiers.second_boss and choice == "Boss" then
-    blind_amt = blind_amt * 1.5
-end
-'''
+payload = '''local chdp_boss = get_new_boss()'''
+
+# NAP compat 3/
+[[patches]]
+[patches.pattern]
+target = '=[SMODS AntePreview "main.lua"]'
+pattern = '''G.GAME.bosses_used[boss] = G.GAME.bosses_used[boss] - 1'''
+position = "after"
+match_indent = true
+payload = '''G.GAME.bosses_used[chdp_boss] = G.GAME.bosses_used[chdp_boss] - 1
+if G.GAME.modifiers.second_boss then
+    return { Small = { blind = "bl_small", tag = small_tag }, Big = { blind = "bl_big", tag = big_tag }, ChDp_Boss = { blind = chdp_boss}, Boss = { blind = boss } }
+end'''
+
+# NAP compat 4/
+[[patches]]
+[patches.pattern]
+target = '=[SMODS AntePreview "main.lua"]'
+pattern = '''* blind.mult * G.GAME.starting_params.ante_scaling'''
+position = "at"
+match_indent = true
+payload = '''* blind.mult * G.GAME.starting_params.ante_scaling * ((G.GAME.modifiers.second_boss and choice == "Boss") and 1.5 or 1)'''
+
+# NAP compat 5/
+[[patches]]
+[patches.pattern]
+target = '=[SMODS AntePreview "main.lua"]'
+pattern = '''local tag = prediction[choice].tag'''
+position = "at"
+match_indent = true
+payload = '''local tag = not(G.GAME.modifiers.disable_skipping) and prediction[choice].tag or nil'''

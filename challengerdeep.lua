@@ -896,9 +896,16 @@ function get_next_voucher_key(_from_tag)
 end
 
 local challenge_desc_ref = G.UIDEF.challenge_description
-function G.UIDEF.challenge_description(_id, daily, is_row)
-    G.GAME.challenge_id = _id
-    return challenge_desc_ref(_id, daily, is_row)
+if next(SMODS.find_mod('aikoyorisshenanigans')) then
+    function G.UIDEF.challenge_description(_id, daily, is_row, is_hardcore)
+        G.GAME.challenge_id = _id
+        return challenge_desc_ref(_id, daily, is_row, is_hardcore)
+    end
+else
+    function G.UIDEF.challenge_description(_id, daily, is_row)
+        G.GAME.challenge_id = _id
+        return challenge_desc_ref(_id, daily, is_row)
+    end
 end
 
 local is_in_run_info_tab = false
@@ -1361,22 +1368,11 @@ function Blind:get_loc_debuff_text()
     return result
 end
 
--- COMPAT - Next Ante Preview
+-- Next Ante Preview Compat
 
 local predict_ref = predict_next_ante
 function predict_next_ante()
-    if G.GAME.modifiers.second_boss then
-        local chdp_boss = get_new_boss()
-        G.GAME.bosses_used[chdp_boss] = G.GAME.bosses_used[chdp_boss] - 1
-    end
     local result = predict_ref()
-    if G.GAME.modifiers.second_boss then
-        result.ChDp_Boss = { blind = chdp_boss }
-    end
-    if G.GAME.modifiers.disable_skipping or (G.GAME.modifiers.disable_skipping_ante > -1 and G.GAME.modifiers.disable_skipping_ante <= G.GAME.round_resets.ante) then
-        result.Small.tag = nil
-        result.Big.tag = nil
-    end
     if G.GAME.modifiers.disable_small or (G.GAME.modifiers.disable_small_ante > -1 and G.GAME.modifiers.disable_small_ante <= G.GAME.round_resets.ante) then
         result.Small = nil
     end

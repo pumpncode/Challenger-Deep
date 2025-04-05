@@ -2,7 +2,7 @@ return {
     misc = {
         dictionary = {
             b_rules = 'Rules',
-            chdp_debuff_hand = ' This Hand is Debuffed'
+            chdp_debuff_hand = ' This Hand is not allowed'
         },
         v_text = {
             ch_c_no_editions = {"Cards with {C:attention}Editions{} will no longer appear"},
