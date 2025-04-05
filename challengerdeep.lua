@@ -1370,16 +1370,19 @@ function predict_next_ante()
     local boss = get_new_boss()
     G.GAME.bosses_used[chdp_boss] = G.GAME.bosses_used[chdp_boss] - 1
     G.GAME.bosses_used[boss] = G.GAME.bosses_used[boss] - 1
-    return { Small = { blind = "bl_small", tag = small_tag }, Big = { blind = "bl_big", tag = big_tag }, ChDp_Boss = { blind = chdp_boss}, Boss = { blind = boss } }
+    if G.GAME.modifiers.second_boss then
+        return { Small = { blind = "bl_small", tag = small_tag }, Big = { blind = "bl_big", tag = big_tag }, ChDp_Boss = { blind = chdp_boss}, Boss = { blind = boss } }
+    end
+    return { Small = { blind = "bl_small", tag = small_tag }, Big = { blind = "bl_big", tag = big_tag }, Boss = { blind = boss } }
 end
 
 function create_ante_preview()
     G.round_eval:get_UIE_by_ID("next_ante_preview").children = {}
     local prediction = predict_next_ante()
-    for _, choice in ipairs({ "Small", "Big", "ChDp_Boss", "Boss" }) do
+    local blinds = G.GAME.modifiers.second_boss and {"Small","Big","ChDp_Boss","Boss"} or {"Small","Big","Boss"}
+    for _, choice in ipairs(blinds) do
         if prediction[choice] then
             local blind = G.P_BLINDS[prediction[choice].blind]
-            print(blind.name)
             local blind_sprite = AnimatedSprite(0, 0, 1, 1,
                 G.ANIMATION_ATLAS[blind.atlas] or G.ANIMATION_ATLAS.blind_chips, blind.pos)
             blind_sprite:define_draw_steps({ { shader = 'dissolve', shadow_height = 0.05 }, { shader = 'dissolve' } })
@@ -1417,7 +1420,7 @@ function create_ante_preview()
             local blind_preview_ui = SMODS.Mods.AntePreview.config.custom_UI and blind.preview_ui and blind:preview_ui()
                 or nil
             local blind_amt = get_blind_amount(G.GAME.round_resets.blind_ante + 1)
-                * blind.mult * G.GAME.starting_params.ante_scaling * (choice == 'Boss' and 1.5 or 1)
+                * blind.mult * G.GAME.starting_params.ante_scaling * ((G.GAME.modifiers.second_boss and choice == 'Boss') and 1.5 or 1)
             local tag = prediction[choice].tag
             local tag_sprite
             local tag_preview_ui
