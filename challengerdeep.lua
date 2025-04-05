@@ -1373,6 +1373,10 @@ function predict_next_ante()
     if G.GAME.modifiers.second_boss then
         result.ChDp_Boss = { blind = chdp_boss }
     end
+    if G.GAME.modifiers.disable_skipping or (G.GAME.modifiers.disable_skipping_ante > -1 and G.GAME.modifiers.disable_skipping_ante <= G.GAME.round_resets.ante) then
+        result.Small.tag = nil
+        result.Big.tag = nil
+    end
     if G.GAME.modifiers.disable_small or (G.GAME.modifiers.disable_small_ante > -1 and G.GAME.modifiers.disable_small_ante <= G.GAME.round_resets.ante) then
         result.Small = nil
     end
