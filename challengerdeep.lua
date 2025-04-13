@@ -1316,6 +1316,10 @@ function Blind:set_blind(blind, reset, silent)
     if G.GAME.modifiers.money_scaling then
     G.GAME.blind.dollars = math.floor(G.GAME.blind.dollars * G.GAME.modifiers.money_scaling)
     end
+    if G.GAME.round_resets.blind_states.ChDp_Boss ~= "Hide" and not(G.GAME.modifiers.second_boss) then
+        G.GAME.round_resets.blind_states.ChDp_Boss = "Hide"
+        G.GAME.round_resets.blind_states.Boss = 'Current'
+    end
     return result
 end
 
