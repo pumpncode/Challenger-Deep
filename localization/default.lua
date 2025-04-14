@@ -2,7 +2,8 @@ return {
     misc = {
         dictionary = {
             b_rules = 'Rules',
-            chdp_debuff_hand = ' This Hand is not allowed'
+            chdp_debuff_hand = '#1# Hands are not allowed',
+            chdp_blackjack = 'Cards in hand must add up to 21'
         },
         v_text = {
             ch_c_no_editions = {"Cards with {C:attention}Editions{} will no longer appear"},
@@ -93,6 +94,10 @@ return {
             ch_c_all_reactive_jokers = {"All {C:attention}Jokers{} are {C:attention}Reactive {C:inactive}(If compatible, Bunco)"},
             ch_c_all_scattering_jokers = {"All {C:attention}Jokers{} are {C:attention}Scattering {C:inactive}(If compatible, Bunco)"},
             ch_c_all_hindered_jokers = {"All {C:attention}Jokers{} are {C:attention}Hindered {C:inactive}(If compatible, Bunco)"},
+            ch_c_all_pinned_jokers = {"All {C:attention}Jokers{} are {C:attention}Pinned"},
+
+            ch_c_disable_suit = {"All Cards with the {C:attention}#1#{} Suit are {C:red}debuffed"},
+            ch_c_disable_rank = {"All {C:attention}#1#s{} are {C:red}debuffed"},
 
             ch_c_rental_rate = {"{C:attention}Rental Jokers{} cost {C:money}$#1#{} per round"},
             ch_c_rental_rate_increase = {"{C:attention}Rental Joker{} prices increase by {C:money}$#1#{} per ante"},
@@ -106,6 +111,8 @@ return {
             ch_c_disable_hand_containing = {"Hands containing a {C:attention}#1#{} are not allowed"},
             ch_c_whitelist_hand = {"{C:attention}#1#{} Hands are whitelisted"},
             ch_c_whitelist_info = {"{C:inactive,S=0.5}Hands that are not whitelisted are {C:red,S=0.5}Disallowed{}"},
+
+            ch_c_blackjack = {"{C:attention}Played Cards {}must add up to #1# {C:inactive, S=0.5}(Face Cards are 10, Aces 1 or 11)"},
 
             ch_c_win_ante = {"Win the run at {C:attention}Ante{} #1#"},
             ch_c_extra_hand_money_scaling = {"Extra {C:blue}Hand{} money is multiplied by {C:red}X#1#"},

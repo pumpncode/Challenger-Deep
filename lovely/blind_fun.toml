@@ -128,7 +128,12 @@ position = "after"
 match_indent = true
 payload = """G.GAME.round_resets.blind_states.ChDp_Boss = G.GAME.modifiers.second_boss and 'Upcoming' or 'Hide'
 G.GAME.round_resets.blind_choices.ChDp_Boss = get_new_boss()
-G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss"""
+G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss
+if G.GAME.round_resets.blind_states.ChDp_Boss ~= 'Hide' and not G.GAME.modifiers.second_boss then
+   G.GAME.round_resets.blind_states.ChDp_Boss = 'Hide'
+   G.GAME.round_resets.blind_states.Boss = 'Current'
+   G.GAME.blind_on_deck = 'Boss'
+end"""
 
 # stop stuff detecting the first boss as THE boss blind (using check G.GAME.last_blind.boss)
 [[patches]]
@@ -239,3 +244,14 @@ pattern = '''local tag = prediction[choice].tag'''
 position = "at"
 match_indent = true
 payload = '''local tag = not(G.GAME.modifiers.disable_skipping) and prediction[choice].tag or nil'''
+
+# Display Blackjack goal
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = """{n=G.UIT.ROOT, config = {align = 'cm', colour = G.C.CLEAR, padding = 0.2}, nodes={"""
+position = "after"
+match_indent = true
+payload = '''G.GAME.modifiers.chdp_blackjack > 0 and {n=G.UIT.R, config = {align = "cm", maxw = 1}, nodes={
+    {n=G.UIT.O, config={object = DynaText({scale = 0.35, string = "Cards in Hand must add up to "..G.GAME.modifiers.chdp_blackjack, maxw = 9, colours = {G.C.WHITE},float = true, shadow = true, silent = true, pop_in = 0, pop_in_rate = 6})}},
+}} or nil,'''
