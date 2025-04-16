@@ -88,6 +88,8 @@ function Back:apply_to_run()
     G.GAME.modifiers.disable_hand = {}
     G.GAME.modifiers.disable_hand_containing = {}
 
+    G.GAME.modifiers.chdp_blackjack = 0
+
     --JOKER FUN
 
     G.GAME.modifiers.minus_jokers_per_dollar = 0
@@ -115,6 +117,13 @@ function Back:apply_to_run()
     G.GAME.modifiers.all_singular_jokers = false
 
     G.GAME.modifiers.all_shrouded_jokers = false
+
+    G.GAME.modifiers.all_pinned_jokers = false
+
+    -- OTHER CARD MODIFICATIONS
+
+    G.GAME.modifiers.disable_suit = {}
+    G.GAME.modifiers.disable_rank = {}
 
     --SHOP
 
@@ -310,6 +319,8 @@ function Game:start_run(args)
                 local disabledHands = {}
                 local disabledContaining = {}
                 local whitelistedHands = {}
+                local debuffedSuits = {}
+                local debuffedRanks = {}
                 if _ch.rules.custom then
                     for k, v in ipairs(_ch.rules.custom)do
 
@@ -459,6 +470,9 @@ function Game:start_run(args)
                     elseif v.id == 'whitelist_hand' then --hand is not allowed
                         whitelistedHands = whitelistedHands or {}
                         whitelistedHands[#whitelistedHands+1] = v.hand
+
+                    elseif v.id == 'blackjack' then -- hands must add up to X
+                        G.GAME.modifiers.chdp_blackjack = v.value
                     
                         -- JOKER FUN
 
@@ -535,6 +549,9 @@ function Game:start_run(args)
 
                     elseif v.id == 'all_shrouded_jokers' then -- every joker is shrouded etc.
                         G.GAME.modifiers.all_shrouded_jokers = true
+                    
+                    elseif v.id == 'all_pinned_jokers' then
+                        G.GAME.modifiers.all_pinned_jokers = true
 
                     elseif v.id == 'all_reactive_jokers' then
                         G.GAME.modifiers.all_reactive_jokers = true
@@ -563,6 +580,14 @@ function Game:start_run(args)
                         G.GAME.modifiers.forced_joker_all = v.card
                     elseif v.id == 'forced_joker_pool' then --forces a pool of jokers as every joker in the shop
                         G.GAME.modifiers.forced_joker_pool = v.pool
+
+
+                        -- OTHER CARD MODIFICATION
+
+                    elseif v.id == 'disable_suit' then --disables a suit
+                        debuffedSuits[#debuffedSuits+1] = v.value
+                    elseif v.id == 'disable_rank' then --disables a rank
+                        debuffedRanks[#debuffedRanks+1] = v.value
 
                         -- TAG
 
@@ -820,6 +845,8 @@ function Game:start_run(args)
                 G.GAME.modifiers.disable_hand = disabledHands
                 G.GAME.modifiers.disable_hand_containing = disabledContaining
                 G.GAME.modifiers.whitelist_hand = whitelistedHands
+                G.GAME.modifiers.disable_suit = debuffedSuits
+                G.GAME.modifiers.disable_rank = debuffedRanks
             end
         end
     end
@@ -1044,6 +1071,9 @@ function Card:set_edition(edition, immediate, silent)
         end
         if G.GAME.modifiers.all_shrouded_jokers == true then
             self.ability.chdp_shrouded = true
+        end
+        if G.GAME.modifiers.all_pinned_jokers == true then
+            self.pinned = true
         end
         if (SMODS.Mods.Bunco or {}).can_load then
             if G.GAME.modifiers.all_hindered_jokers == true then
@@ -1316,6 +1346,10 @@ function Blind:set_blind(blind, reset, silent)
     if G.GAME.modifiers.money_scaling then
     G.GAME.blind.dollars = math.floor(G.GAME.blind.dollars * G.GAME.modifiers.money_scaling)
     end
+    if G.GAME.round_resets.blind_states.ChDp_Boss ~= "Hide" and not(G.GAME.modifiers.second_boss) then
+        G.GAME.round_resets.blind_states.ChDp_Boss = "Hide"
+        G.GAME.round_resets.blind_states.Boss = 'Current'
+    end
     return result
 end
 
@@ -1325,6 +1359,20 @@ function Blind:debuff_card(card, from_blind)
     if card.ability.debuff_rule then
         card:set_debuff(true)
     end
+    if G.GAME.modifiers.disable_suit and type(G.GAME.modifiers.disable_suit) ~= "string" then
+        for k, v in ipairs(G.GAME.modifiers.disable_suit) do
+            if card.base.suit == v then
+                card:set_debuff(true)
+            end
+        end
+    end
+    if G.GAME.modifiers.disable_rank and type(G.GAME.modifiers.disable_rank) ~= "string" then
+        for k, v in ipairs(G.GAME.modifiers.disable_rank) do
+            if card.base.value == v then
+                card:set_debuff(true)
+            end
+        end
+    end
     return result
 end
 
@@ -1332,6 +1380,7 @@ local debuff_hand_ref = Blind.debuff_hand
 function Blind:debuff_hand(cards, hand, handname, check)
     local result = debuff_hand_ref(self,cards, hand, handname, check)
     local whitelist = true
+    G.GAME.hand_to_disable = nil
     if G.GAME.modifiers.whitelist_hand and #G.GAME.modifiers.whitelist_hand > 0 then
         for k, v in ipairs(G.GAME.modifiers.whitelist_hand) do
             if handname == v then
@@ -1355,14 +1404,33 @@ function Blind:debuff_hand(cards, hand, handname, check)
             end
         end
     end
+    if G.GAME.modifiers.chdp_blackjack > 0 then
+        local sum = 0
+        local aces = 0
+        for k, v in ipairs(cards) do
+            sum = sum + v.base.nominal
+            if v.base.value == 'Ace' then
+                aces = aces + 1
+            end
+        end
+        G.GAME.hand_total = true
+        for i = 0, aces do
+            sum = sum - 10 -- Change ace from an 11 to a 1
+            if sum == G.GAME.modifiers.chdp_blackjack then
+                G.GAME.hand_total = false
+            end
+        end
+        if G.GAME.hand_total == true then
+            return true
+        end
+    end
     return result
 end
 
 local debuff_text_ref = Blind.get_loc_debuff_text
 function Blind:get_loc_debuff_text()
-    local hand = G.GAME.current_round.current_hand.handname
         if G.GAME.hand_to_disable then
-            return localize('chdp_debuff_hand')
+            return (G.GAME.hand_to_disable..' hands are Debuffed')
         end
     result = debuff_text_ref(self)
     return result
@@ -1424,13 +1492,13 @@ SMODS.Sticker{
     pos = {x = 1, y = 0}
 }
 
---[[ test challenge
 SMODS.Challenge{
     loc_txt = "Test",
     key = 'test',
     rules = {
         custom = {
-            {id = 'chaos_engine_skip'}
+            {id = 'disable_suit', value = 'Hearts'},
+            {id = 'disable_rank', value = '3'}
     },
         modifiers = {
         },
@@ -1444,7 +1512,7 @@ SMODS.Challenge{
     },
 }
 
--- SMODS.Challenge{
+--[[SMODS.Challenge{
         loc_txt = "Test 2",
         key = 'test_2',
         rules = {
