@@ -121,5 +121,4 @@ Shrouded Jokers are flipped upon obtaining them.
 
 ## Example Challenges
 
-Example Challenges have been moved to a separate Mod file, ChallengerDeepExamples.
-This file will be updated and uploaded in a separate zip to the main mod.
+Challenger Deep Examples can be found here: https://github.com/OOkayOak/Challenger-Examples
