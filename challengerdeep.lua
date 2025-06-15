@@ -156,6 +156,8 @@ function Back:apply_to_run()
 
     G.GAME.challenge_id = G.GAME.challenge
 
+    G.GAME.chdp_disabled_partner = false
+
     G.GAME.chaos_engine = false
     G.GAME.chaos_tags = {
         'uncommon',
@@ -587,7 +589,16 @@ function Game:start_run(args)
                     elseif v.id == 'disable_suit' then --disables a suit
                         debuffedSuits[#debuffedSuits+1] = v.value
                     elseif v.id == 'disable_rank' then --disables a rank
-                        debuffedRanks[#debuffedRanks+1] = v.value
+                        ranksForDebuff = {'2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'}
+                        debuffRank = 0
+                        for kk, vv in ipairs(ranksForDebuff) do
+                            print(vv, ' against ', v.value)
+                            if vv == v.value then
+                                debuffRank = kk+1
+                            end
+                        end
+                        print(debuffRank)
+                        debuffedRanks[#debuffedRanks+1] = debuffRank
 
                         -- TAG
 
@@ -640,6 +651,11 @@ function Game:start_run(args)
 				                return true
 			                end
 		                }))]]
+
+                        -- COMPAT - PARTNER
+
+                    elseif v.id == 'disable_partner' then --disables Partner
+                        G.GAME.chdp_disabled_partner = true
 
                         -- MISCELLANEOUS
 
@@ -1359,19 +1375,21 @@ function Blind:debuff_card(card, from_blind)
     if card.ability.debuff_rule then
         card:set_debuff(true)
     end
+    if not(card.ability.set == 'Joker' or card.ability.consumable or card.ability.set == 'Voucher' or card.ability.set == 'Booster') then
     if G.GAME.modifiers.disable_suit and type(G.GAME.modifiers.disable_suit) ~= "string" then
         for k, v in ipairs(G.GAME.modifiers.disable_suit) do
-            if card.base.suit == v then
+            if card:is_suit(v) then
                 card:set_debuff(true)
             end
         end
     end
     if G.GAME.modifiers.disable_rank and type(G.GAME.modifiers.disable_rank) ~= "string" then
         for k, v in ipairs(G.GAME.modifiers.disable_rank) do
-            if card.base.value == v then
+            if card:get_id() == v then
                 card:set_debuff(true)
             end
         end
+    end
     end
     return result
 end
@@ -1493,24 +1511,22 @@ SMODS.Sticker{
 }
 
 SMODS.Challenge{
-    loc_txt = "Test",
-    key = 'test',
-    rules = {
-        custom = {
-            {id = 'disable_suit', value = 'Hearts'},
-            {id = 'disable_rank', value = '3'}
-    },
-        modifiers = {
+        loc_txt = "Test",
+        key = 'test',
+        rules = {
+            custom = {
+            },
+            modifiers = {
+            },
         },
-    },
-    jokers = {
-    },
-    restrictions = {
-        banned_cards = {},
-        banned_tags = {},
-        banned_other = {}
-    },
-}
+        jokers = {
+        },
+        restrictions = {
+            banned_cards = {},
+            banned_tags = {},
+            banned_other = {}
+        },
+        }
 
 --[[SMODS.Challenge{
         loc_txt = "Test 2",
