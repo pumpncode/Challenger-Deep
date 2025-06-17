@@ -156,7 +156,9 @@ function Back:apply_to_run()
 
     G.GAME.challenge_id = G.GAME.challenge
 
-    G.GAME.chdp_disabled_partner = false
+    G.GAME.modifiers.chdp_disabled_partner = false
+    G.GAME.modifiers.chdp_disable_charms = false
+    G.GAME.modifiers.chdp_hide_skills_grim = false
 
     G.GAME.chaos_engine = false
     G.GAME.chaos_tags = {
@@ -299,6 +301,12 @@ function Back:apply_to_run()
 
     if (SMODS.Mods["Talisman"] or {}).can_load then --talisman is here
         G.GAME.modifiers.chdp_talisman_check = true
+    end
+
+    if (SMODS.Mods["YGGDRASIL"] or {}).can_load then --Yggdrasil is here.
+        G.GAME.modifiers.chdp_banned_skills_yggdrasil = {}
+        G.GAME.modifiers.chdp_ygg_min_mats = 1
+        G.GAME.modifiers.chdp_ygg_max_mats = 3
     end
 
     G.GAME.chaos_editions_jokers = G.GAME.chaos_editions
@@ -592,12 +600,10 @@ function Game:start_run(args)
                         ranksForDebuff = {'2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'}
                         debuffRank = 0
                         for kk, vv in ipairs(ranksForDebuff) do
-                            print(vv, ' against ', v.value)
                             if vv == v.value then
                                 debuffRank = kk+1
                             end
                         end
-                        print(debuffRank)
                         debuffedRanks[#debuffedRanks+1] = debuffRank
 
                         -- TAG
@@ -652,11 +658,44 @@ function Game:start_run(args)
 			                end
 		                }))]]
 
-                        -- COMPAT - PARTNER
+                        -- COMPAT - OTHER MODS
 
                     elseif v.id == 'disable_partner' then --disables Partner
-                        G.GAME.chdp_disabled_partner = true
+                        G.GAME.modifiers.chdp_disabled_partner = true
+                    elseif v.id == 'disable_charms' then --disables Charms
+                        G.GAME.modifiers.chdp_disable_charms = true
+                    elseif v.id == 'chdp_xp_mult_grim' then --multiplies all XP earned in Grim
+                        G.GAME.modifiers.chdp_grim_xp_mult = v.value
+                    elseif v.id == 'chdp_hide_skills_grim' then -- hides the skill tree
+                        G.GAME.modifiers.chdp_hide_skills_grim = true
 
+                    elseif v.id == 'chdp_xp_mult_yggdrasil' then -- multiplies all Yggdrasil XP
+                        G.GAME.modifiers.chdp_ygg_xp_mult = v.value
+                    elseif v.id == 'chdp_no_skills_yggdrasil' then -- disables every Yggdrasil skill
+                    local SkillTreeTables = {}
+                    for k2, v2 in ipairs(SkillTreeSections) do
+                        for k3, v3 in ipairs(v2) do
+                            SkillTreeTables[#SkillTreeTables+1] = v3
+                        end
+                    end
+                    for k2, v2 in ipairs(SkillTreeTables) do
+                        for k3, v3 in ipairs(SkillTreePerks[v2]) do
+                            for k4, v4 in ipairs(v3) do
+                                G.GAME.modifiers.chdp_banned_skills_yggdrasil[v4.perk_id] = true
+                            end
+                        end
+                    end
+                    elseif v.id == 'chdp_min_items_per_blind_yggdrasil' then -- min items given per blind in Yggdrasil
+                        G.GAME.modifiers.chdp_ygg_min_mats = v.value
+                        reset_blind_loots()
+                    elseif v.id == 'chdp_max_items_per_blind_yggdrasil' then -- max items given per blind in Yggdrasil
+                        G.GAME.modifiers.chdp_ygg_max_mats = v.value
+                        reset_blind_loots()
+                    elseif v.id == 'chdp_no_loot_yggdrasil' then -- no loot in yggdrasil
+                        G.GAME.modifiers.chdp_ygg_min_mats = 0
+                        G.GAME.modifiers.chdp_ygg_max_mats = 0
+                        reset_blind_loots()
+                    
                         -- MISCELLANEOUS
 
                     elseif v.id == 'win_ante' then --sets win ante
@@ -1035,7 +1074,7 @@ function G.UIDEF.run_rules()
     if challenge.rules then
       if challenge.rules.custom then
         for k, v in ipairs(challenge.rules.custom) do
-          game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {v.value}}}
+                game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {v.value}}}
         end  
       end
       if G.GAME.chaos_rules then
@@ -1225,17 +1264,11 @@ local update_ca_ref = CardArea.update
 function CardArea:update(dt)
     if self == G.hand then
         if G.GAME.modifiers.minus_jokers_per_dollar then
-        if G.GAME.modifiers.minus_jokers_per_dollar > 0 then
+            if G.GAME.modifiers.minus_jokers_per_dollar > 0 then
             self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
-            if (SMODS.Mods["Talisman"] or {}).can_load and (math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk) or 
-            math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar) ~= self.config.last_poll_size_jk then
-                if (SMODS.Mods["Talisman"] or {}).can_load and (to_number(to_big(G.GAME.dollars))/(G.GAME.modifiers.minus_jokers_per_dollar) <= G.GAME.starting_params.joker_slots) then 
-                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots - math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar)
-                elseif not((SMODS.Mods["Talisman"] or {}).can_load) and G.GAME.dollars/(G.GAME.modifiers.minus_jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
-                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots - math.floor(G.GAME.dollars/G.GAME.modifiers.minus_jokers_per_dollar)
-                else
-                    G.jokers.config.card_limit = 0
-                end
+            local jokerstoadd = math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar)
+            if jokerstoadd ~= self.config.last_poll_size_jk and jokerstoadd > 0 then
+                G.jokers.config.card_limit = G.jokers.config.card_limit - (jokerstoadd - self.config.last_poll_size_jk)
                 self.config.last_poll_size_jk = math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.minus_jokers_per_dollar)
             end
         end
@@ -1243,19 +1276,10 @@ function CardArea:update(dt)
         if G.GAME.modifiers.jokers_per_dollar then
             if G.GAME.modifiers.jokers_per_dollar > 0 then
             self.config.last_poll_size_jk = self.config.last_poll_size_jk or 0
-            if (SMODS.Mods["Talisman"] or {}).can_load and math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar) ~= self.config.last_poll_size_jk or
-            math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) ~= self.config.last_poll_size_jk then
-                if (SMODS.Mods["Talisman"] or {}).can_load and math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
-                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots + math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar)
-                elseif not((SMODS.Mods["Talisman"] or {}).can_load) and math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar) <= G.GAME.starting_params.joker_slots then
-                    G.jokers.config.card_limit = G.GAME.starting_params.joker_slots + math.floor(G.GAME.dollars/G.GAME.modifiers.jokers_per_dollar)
-                else
-                    G.jokers.config.card_limit = 0
-                end
+            local jokerstoadd = math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar)
+            if jokerstoadd ~= self.config.last_poll_size_jk and jokerstoadd > 0 then
+                G.jokers.config.card_limit = G.jokers.config.card_limit + (jokerstoadd - self.config.last_poll_size_jk)
                 self.config.last_poll_size_jk = math.floor(to_number(to_big(G.GAME.dollars))/G.GAME.modifiers.jokers_per_dollar)
-                if G.jokers.config.card_limit < 0 then
-                    G.jokers.config.card_limit = 0
-                end
             end
         end
         end
@@ -1468,6 +1492,50 @@ function predict_next_ante()
     return result
 end
 
+-- Grim compat
+
+local grim_add_xp_ref = add_skill_xp
+function add_skill_xp(amount, card, message_, no_mod)
+    amount = amount*(G.GAME.modifiers.chdp_grim_xp_mult or 1)
+    return grim_add_xp_ref(amount,card,message_,no_mod)
+end
+
+G.FUNCS.your_mod_buttons_math = function(e)
+    G.FUNCS.overlay_menu{
+        definition = not(G.GAME.modifiers.chdp_hide_skills_grim) and create_UI_mod_buttons_math() or nil,
+    }
+end
+
+-- Yggdrasil compat
+
+local YGGDRASIL = (SMODS.Mods["YGGDRASIL"] or {})
+
+if YGGDRASIL.can_load then
+    local ygg_add_xp_ref = YGGDRASIL.change_xp
+    YGGDRASIL.change_xp = function(xp)
+        if xp > 0 then
+            xp = xp * (G.GAME.modifiers.chdp_ygg_xp_mult or 1)
+        end
+        ygg_add_xp_ref(xp)
+    end
+
+    local ygg_skill_obtained = if_skill_obtained
+    function if_skill_obtained(key)
+        if G.GAME.modifiers.chdp_banned_skills_yggdrasil[key] then
+            return false
+        else
+            return ygg_skill_obtained(key)
+        end
+    end
+
+--[[local ygg_skill_unlocked = sp_check_if_unlocked
+    function sp_check_if_unlocked(e)
+        if G.GAME.modifiers.chdp_no_skills_yggdrasil then
+            return false
+        end
+        return ygg_skill_unlocked(e)
+    end]]
+end
 --HAVE A STICKER
 
 SMODS.Sticker{
@@ -1515,6 +1583,9 @@ SMODS.Challenge{
         key = 'test',
         rules = {
             custom = {
+                {id = 'chdp_no_loot_yggdrasil', value = 0},
+                {id = 'chdp_xp_mult_yggdrasil', value = 0},
+                {id = 'chdp_no_skills_yggdrasil'}
             },
             modifiers = {
             },
