@@ -1528,13 +1528,13 @@ if YGGDRASIL.can_load then
         end
     end
 
---[[local ygg_skill_unlocked = sp_check_if_unlocked
+local ygg_skill_unlocked = sp_check_if_unlocked
     function sp_check_if_unlocked(e)
-        if G.GAME.modifiers.chdp_no_skills_yggdrasil then
+        if G.GAME.modifiers.chdp_banned_skills_yggdrasil[e.config.perk_info.perk_id] then
             return false
         end
         return ygg_skill_unlocked(e)
-    end]]
+    end
 end
 --HAVE A STICKER
 
