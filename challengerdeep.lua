@@ -1433,10 +1433,10 @@ function Blind:debuff_hand(cards, hand, handname, check)
         end
         G.GAME.hand_total = true
         for i = 0, aces do
-            sum = sum - 10 -- Change ace from an 11 to a 1
             if sum == G.GAME.modifiers.chdp_blackjack then
                 G.GAME.hand_total = false
             end
+            sum = sum - 10 -- Change ace from an 11 to a 1
         end
         if G.GAME.hand_total == true then
             return true
