@@ -148,9 +148,10 @@ return {
             ch_c_disable_small_ante = {'{C:attention}Small Blinds{} will no longer appear after Ante {C:attention}#1#'},
             ch_c_disable_big = {'No {C:attention}Big Blinds{} will appear'},
             ch_c_disable_big_ante = {'{C:attention}Big Blinds{} will no longer appear after Ante {C:attention}#1#'},
-            ch_c_second_boss = {'Antes have {C:attention}Two Boss Blinds'},
-            ch_c_second_boss_ante = {'2 {C:attention}Boss Blinds{} will appear each Ante, starting Ante {C:attention}#1#'},
-            ch_c_second_boss_until = {'2 {C:attention}Boss Blinds{} will appear each Ante, ending Ante {C:attention}#1#'},
+            ch_c_second_boss = {'An {C:attention}additional Boss Blind{} will appear'},
+            ch_c_second_boss_ante = {'An {C:attention}Additional Boss Blind{} will appear each Ante, starting Ante {C:attention}#1#'},
+            ch_c_chdp_third_boss = {'An {C:attention}additional Boss Blind{} will appear'},
+            ch_c_chdp_third_boss_ante = {'An {C:attention}Additional Boss Blind{} will appear each Ante, starting Ante {C:attention}#1#'},
             ch_c_disable_skipping = {"{C:attention}Skipping Blinds{} is {C:red}disabled"},
             ch_c_disable_skipping_ante = {"{C:attention}Skipping Blinds{} is {C:red}disabled{} after Ante {C:attention}#1#"},
 
@@ -183,7 +184,7 @@ return {
             ch_c_disable_partner = {'You cannot select a {C:attention}Partner{C:inactive} (Partner)'},
             ch_c_disable_charms = {'{C:attention}Charms{} will not appear {C:inactive}(Bakery)'},
             ch_c_chdp_xp_mult_grim = {'All {C:attention}XP{} earned is multiplied by {C:red}X#1# {C:inactive}(Grim)'},
-            ch_c_chdp_hide_skills_grim = {'Hide the {C:attention}Skill Tree{C:inactive} (Grim)'},
+            ch_c_chdp_no_learning_grim = {'Hide the {C:attention}Skill Tree{C:inactive} (Grim)'},
 
             -- MISCELLANEOUS
 

@@ -147,7 +147,11 @@ function Back:apply_to_run()
     G.GAME.modifiers.disable_big_ante = -1
     G.GAME.modifiers.second_boss = false
     G.GAME.modifiers.second_boss_ante = -1
+    G.GAME.modifiers.chdp_third_boss = false
+    G.GAME.modifiers.chdp_third_boss_ante = -1
     G.GAME.last_chdp_blind = nil
+    G.GAME.last_chdp2_blind = nil
+    G.GAME.chdp_additional_blinds = 0
 
     G.GAME.modifiers.disable_skipping = false
     G.GAME.modifiers.disable_skipping_ante = -1
@@ -158,7 +162,7 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.chdp_disabled_partner = false
     G.GAME.modifiers.chdp_disable_charms = false
-    G.GAME.modifiers.chdp_hide_skills_grim = false
+    G.GAME.modifiers.chdp_no_learning_grim = false
 
     G.GAME.chaos_engine = false
     G.GAME.chaos_tags = {
@@ -313,7 +317,6 @@ function Back:apply_to_run()
     G.GAME.chaos_editions_cards = G.GAME.chaos_editions
     G.GAME.chaos_editions_jokers[#G.GAME.chaos_editions_jokers+1] = 'negative'
     G.GAME.chaos_rules = {}
-
 end
 
   local start_run_ref = Game.start_run
@@ -331,6 +334,8 @@ function Game:start_run(args)
                 local whitelistedHands = {}
                 local debuffedSuits = {}
                 local debuffedRanks = {}
+                local blindsForOnlyPillars = G.P_BLINDS
+
                 if _ch.rules.custom then
                     for k, v in ipairs(_ch.rules.custom)do
 
@@ -634,11 +639,20 @@ function Game:start_run(args)
                     elseif v.id == 'second_boss_ante' then --add another blind at ante X
                         G.GAME.modifiers.second_boss_ante = v.value
 
+                    elseif v.id == 'chdp_third_boss' then -- AGAIN!
+                        G.GAME.modifiers.chdp_third_boss = true
+                        G.GAME.round_resets.blind_choices.Chdp_Boss2 = get_new_boss()
+                        G.GAME.last_chdp2_blind = G.GAME.round_resets.blind_choices.ChDp_Boss2
+                        G.GAME.round_resets.blind_states.ChDp_Boss2 = 'Upcoming'
+
+                    elseif v.id == 'chdp_third_boss_ante' then --AGAIN!!!
+                        G.GAME.modifiers.chdp_third_boss_ante = v.value
+
                     elseif v.id == 'disable_skipping' then --disable skipping
                         G.GAME.modifiers.disable_skipping = true
                     elseif v.id == 'disable_skipping_ante' then --disable skipping at ante X
                         G.GAME.modifiers.disable_skipping_ante = v.value
-                    
+
                         -- WUMPUS AND CLYDE (DOES NOT FUNCTION AS WUMPUS AND CLYDE IS UNRELEASED)
 
                     --[[elseif v.id == 'discord_suits' then --adds Wumpus and Clyde suits REQUIRES WUMPUS AND CLYDE
@@ -666,8 +680,8 @@ function Game:start_run(args)
                         G.GAME.modifiers.chdp_disable_charms = true
                     elseif v.id == 'chdp_xp_mult_grim' then --multiplies all XP earned in Grim
                         G.GAME.modifiers.chdp_grim_xp_mult = v.value
-                    elseif v.id == 'chdp_hide_skills_grim' then -- hides the skill tree
-                        G.GAME.modifiers.chdp_hide_skills_grim = true
+                    elseif v.id == 'chdp_no_learning_grim' then -- hides the skill tree
+                        G.GAME.modifiers.chdp_no_learning_grim = true
 
                     elseif v.id == 'chdp_xp_mult_yggdrasil' then -- multiplies all Yggdrasil XP
                         G.GAME.modifiers.chdp_ygg_xp_mult = v.value
@@ -963,6 +977,12 @@ function end_round()
         G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss
         G.GAME.round_resets.blind_states.ChDp_Boss = 'Upcoming'
     end
+    if (G.GAME.round_resets.ante + 1) == G.GAME.modifiers.chdp_third_boss_ante and G.GAME.blind:get_type() == 'Boss' then
+        G.GAME.modifiers.chdp_third_boss = true
+        G.GAME.round_resets.blind_choices.ChDp_Boss2 = get_new_boss()
+        G.GAME.last_chdp2_blind = G.GAME.round_resets.blind_choices.ChDp_Boss2
+        G.GAME.round_resets.blind_states.ChDp_Boss2 = 'Upcoming'
+    end 
     return end_round_ref()
 end
 
@@ -1354,16 +1374,10 @@ function CardArea:update(dt)
         if G.GAME.modifiers.hand_per_joker then
             local base = G.GAME.starting_params.hands
             G.GAME.round_resets.hands = base + #G.jokers.cards
-            if (SMODS.Mods.BANANA or {}).can_load then
-                G.GAME.round_resets.hands = G.GAME.round_resets.hands - G.GAME.voodooheart
-            end
         end
         if G.GAME.modifiers.minus_discard_per_joker then
             local base = G.GAME.starting_params.discards
             G.GAME.round_resets.discards = base - #G.jokers.cards
-            if (SMODS.Mods.BANANA or {}).can_load then
-                G.GAME.round_resets.discards = G.GAME.round_resets.discards - G.GAME.mirrorbroken
-            end
         end
     end
     local result = update_ca_ref(self, dt)
@@ -1385,6 +1399,10 @@ function Blind:set_blind(blind, reset, silent)
     local result = set_blind_ref(self, blind, reset, silent)
     if G.GAME.modifiers.money_scaling then
     G.GAME.blind.dollars = math.floor(G.GAME.blind.dollars * G.GAME.modifiers.money_scaling)
+    end
+    if G.GAME.round_resets.blind_states.ChDp_Boss2 ~= "Hide" and not(G.GAME.modifiers.chdp_third_boss) then
+        G.GAME.round_resets.blind_states.ChDp_Boss2 = "Hide"
+        G.GAME.round_resets.blind_states.ChDp_Boss = 'Current'
     end
     if G.GAME.round_resets.blind_states.ChDp_Boss ~= "Hide" and not(G.GAME.modifiers.second_boss) then
         G.GAME.round_resets.blind_states.ChDp_Boss = "Hide"
@@ -1494,18 +1512,25 @@ end
 
 -- Grim compat
 
+local GRIM = (SMODS.Mods["GRM"] or {})
+
+if GRIM.can_load then
 local grim_add_xp_ref = add_skill_xp
 function add_skill_xp(amount, card, message_, no_mod)
     amount = amount*(G.GAME.modifiers.chdp_grim_xp_mult or 1)
     return grim_add_xp_ref(amount,card,message_,no_mod)
 end
 
-G.FUNCS.your_mod_buttons_math = function(e)
-    G.FUNCS.overlay_menu{
-        definition = not(G.GAME.modifiers.chdp_hide_skills_grim) and create_UI_mod_buttons_math() or nil,
-    }
+local grim_can_learn = G.FUNCS.can_learn
+G.FUNCS.can_learn = function(e)
+    if G.GAME.modifiers.chdp_no_learning_grim then
+        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+        e.config.button = 'do_nothing'
+    else
+        return grim_can_learn(e)
+    end
 end
-
+end
 -- Yggdrasil compat
 
 local YGGDRASIL = (SMODS.Mods["YGGDRASIL"] or {})
@@ -1521,16 +1546,16 @@ if YGGDRASIL.can_load then
 
     local ygg_skill_obtained = if_skill_obtained
     function if_skill_obtained(key)
-        if G.GAME.modifiers.chdp_banned_skills_yggdrasil[key] then
+        if G.GAME.modifiers.chdp_banned_skills_yggdrasil and G.GAME.modifiers.chdp_banned_skills_yggdrasil[key] then
             return false
         else
             return ygg_skill_obtained(key)
         end
     end
 
-local ygg_skill_unlocked = sp_check_if_unlocked
+    local ygg_skill_unlocked = sp_check_if_unlocked
     function sp_check_if_unlocked(e)
-        if G.GAME.modifiers.chdp_banned_skills_yggdrasil[e.config.perk_info.perk_id] then
+        if G.GAME.modifiers.chdp_banned_skills_yggdrasil and G.GAME.modifiers.chdp_banned_skills_yggdrasil[e.config.perk_info.perk_id] then
             return false
         end
         return ygg_skill_unlocked(e)
@@ -1579,13 +1604,12 @@ SMODS.Sticker{
 }
 
 SMODS.Challenge{
-        loc_txt = "Test",
+        loc_txt = "Fuck You",
         key = 'test',
         rules = {
             custom = {
-                {id = 'chdp_no_loot_yggdrasil', value = 0},
-                {id = 'chdp_xp_mult_yggdrasil', value = 0},
-                {id = 'chdp_no_skills_yggdrasil'}
+                {id = 'chdp_third_boss'},
+                {id = 'second_boss'}
             },
             modifiers = {
             },

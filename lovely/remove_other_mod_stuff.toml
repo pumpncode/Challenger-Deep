@@ -21,56 +21,11 @@ position = "at"
 match_indent = true
 payload = '''if not G.GAME.modifiers.chdp_disable_charms then Bakery_API.add_charm_to_shop(key, 'shop_voucher') end'''
 
-# Yggdrasil "compat"
+# grim "Compat"
 [[patches]]
 [patches.pattern]
-target = '=[SMODS YGGDRASIL "code/jokers.lua"]'
-pattern = '''if not DisabledSkills[i] then'''
+target = '=[SMODS GRM "Grim.lua"]'
+pattern = '''local t = {n=G.UIT.R, config={align = "cm", id = 'skill_tree_ui', colour = G.C.CLEAR, paddng = 0.1}, nodes = {'''
 position = "at"
 match_indent = true
-payload = '''if not (DisabledSkills[i] or G.GAME.modifiers.chdp_banned_skills_yggdrasil[i]) then'''
-
-# actual Yggdrasil "compat"
-[[patches]]
-[patches.pattern]
-target = '=[SMODS YGGDRASIL "code/loot_system.lua"]'
-pattern = '''local amountOfMat = pseudorandom("amountOfMat_check",1,3)'''
-position = "at"
-match_indent = true
-payload = '''local amountOfMat = pseudorandom("amountOfMat_check",G.GAME.modifiers.chdp_ygg_min_mats,(G.GAME.modifiers.chdp_ygg_max_mats))'''
-
-# actual Yggdrasil compat
-[[patches]]
-[patches.pattern]
-target = '=[SMODS YGGDRASIL "code/loot_system.lua"]'
-pattern = '''if G.GAME["loot_table"][type.."Loots"] then'''
-position = "at"
-match_indent = true
-payload = '''if G.GAME["loot_table"][type.."Loots"] and #G.GAME["loot_table"][type.."Loots"] > 3 then
-    for _,v in ipairs(G.GAME["loot_table"][type.."Loots"]) do
-        if _ < 4 then
-            nodes[#nodes+1] = {}
-            local loc_vars = {scale = 0.925, text_colour = G.C.WHITE, background_colour = G.C.CLEAR, vars = {v.amount, localize("ygg_"..v.info.id), localize("ygg_"..v.info.rarity), colours = { G.C["ygg_"..v.info.rarity]},}}
-            localize({type = 'descriptions', key = "ygg_test", set = 'Other', nodes = nodes[#nodes], vars = loc_vars.vars, scale = loc_vars.scale, text_colour = loc_vars.text_colour, shadow = loc_vars.shadow})
-            nodes[#nodes] = desc_from_rows(nodes[#nodes])
-            nodes[#nodes].config.colour = loc_vars.background_colour or nodes[#nodes].config.colour
-            nodes[#nodes].config.outline = 0.7
-            nodes[#nodes].config.outline_colour = G.C.GRAY
-        end
-        if _ == 4 then
-            local loc_vars = {scale = 0.925, text_colour = G.C.WHITE, background_colour = G.C.CLEAR, vars = {(#G.GAME["loot_table"][type.."Loots"] - 3)}}
-            localize({type = 'descriptions', key = "chdp_ygg_more", set = 'Other', nodes = nodes[#nodes], vars = loc_vars.vars, scale = loc_vars.scale, text_colour = loc_vars.text_colour, shadow = loc_vars.shadow})
-            nodes[#nodes] = desc_from_rows(nodes[#nodes])
-            nodes[#nodes].config.colour = loc_vars.background_colour or nodes[#nodes].config.colour
-            nodes[#nodes].config.outline = 0.7
-            nodes[#nodes].config.outline_colour = G.C.GRAY
-        end
-    end
-elseif G.GAME["loot_table"][type.."Loots"] and #(G.GAME["loot_table"][type.."Loots"]) == 0 then
-    local loc_vars = {scale = 0.925, text_colour = G.C.WHITE, background_colour = G.C.CLEAR, vars = {}}
-        localize({type = 'descriptions', key = "chdp_ygg_zero", set = 'Other', nodes = nodes[#nodes], vars = loc_vars.vars, scale = loc_vars.scale, text_colour = loc_vars.text_colour, shadow = loc_vars.shadow})
-        nodes[#nodes] = desc_from_rows(nodes[#nodes])
-        nodes[#nodes].config.colour = loc_vars.background_colour or nodes[#nodes].config.colour
-        nodes[#nodes].config.outline = 0.7
-        nodes[#nodes].config.outline_colour = G.C.GRAY
-elseif G.GAME["loot_table"][type.."Loots"] then'''
+payload = '''local t = G.GAME.modifiers.chdp_hide_skills_grim and nil or {n=G.UIT.R, config={align = "cm", id = 'skill_tree_ui', colour = G.C.CLEAR, paddng = 0.1}, nodes = {'''
