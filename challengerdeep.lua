@@ -1603,8 +1603,8 @@ SMODS.Sticker{
     pos = {x = 1, y = 0}
 }
 
-SMODS.Challenge{
-        loc_txt = "Fuck You",
+--[[SMODS.Challenge{
+        loc_txt = "Test",
         key = 'test',
         rules = {
             custom = {
@@ -1623,7 +1623,7 @@ SMODS.Challenge{
         },
         }
 
---[[SMODS.Challenge{
+SMODS.Challenge{
         loc_txt = "Test 2",
         key = 'test_2',
         rules = {
