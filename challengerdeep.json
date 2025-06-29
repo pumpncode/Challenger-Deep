@@ -7,5 +7,5 @@
 	"prefix": "chdp",
 	"priority": 10,
 	"main_file": "challengerdeep.lua",
-	"version": "1.4.0"
+	"version": "1.4.1"
 }

@@ -156,6 +156,8 @@ function Back:apply_to_run()
     G.GAME.modifiers.disable_skipping = false
     G.GAME.modifiers.disable_skipping_ante = -1
 
+    G.GAME.modifiers.chdp_pillar = false
+
     G.GAME.chdp_spacer = false
 
     G.GAME.challenge_id = G.GAME.challenge
@@ -529,6 +531,9 @@ function Game:start_run(args)
                     elseif v.id == 'enable_hindered_jokers' then
                         G.GAME.modifiers.enable_hindered_in_shop = true
 
+                    elseif v.id == 'enable_stacked_cards' then -- Opalstuff time?
+                        G.GAME.modifiers['enable_opal_stacked'] = true
+
                     elseif v.id == 'enable_all_stickers' then -- enable every sticker
                         G.GAME.modifiers.enable_eternals_in_shop = true
                         G.GAME.modifiers.enable_perishables_in_shop = true
@@ -640,6 +645,10 @@ function Game:start_run(args)
                         G.GAME.modifiers.second_boss_ante = v.value
 
                     elseif v.id == 'chdp_third_boss' then -- AGAIN!
+                        G.GAME.modifiers.second_boss = true
+                        G.GAME.round_resets.blind_choices.ChDp_Boss = get_new_boss()
+                        G.GAME.last_chdp_blind = G.GAME.round_resets.blind_choices.ChDp_Boss
+                        G.GAME.round_resets.blind_states.ChDp_Boss = 'Upcoming'
                         G.GAME.modifiers.chdp_third_boss = true
                         G.GAME.round_resets.blind_choices.Chdp_Boss2 = get_new_boss()
                         G.GAME.last_chdp2_blind = G.GAME.round_resets.blind_choices.ChDp_Boss2
@@ -652,6 +661,9 @@ function Game:start_run(args)
                         G.GAME.modifiers.disable_skipping = true
                     elseif v.id == 'disable_skipping_ante' then --disable skipping at ante X
                         G.GAME.modifiers.disable_skipping_ante = v.value
+
+                    elseif v.id == 'chdp_pillar' then --pillar :3
+                        G.GAME.modifiers.chdp_pillar = true
 
                         -- WUMPUS AND CLYDE (DOES NOT FUNCTION AS WUMPUS AND CLYDE IS UNRELEASED)
 
@@ -1411,6 +1423,21 @@ function Blind:set_blind(blind, reset, silent)
     return result
 end
 
+local defeat_blind_ref = Blind.defeat
+function Blind:defeat(silent)
+    local result = defeat_blind_ref(self, silent)
+    if G.GAME.modifiers.second_boss and G.GAME.round_resets.blind_states.ChDp_Boss == "Upcoming" and G.GAME.round_resets.blind_states.Boss == "Current" then
+        G.GAME.round_resets.blind_states.ChDp_Boss = "Current"
+        G.GAME.round_resets.blind_states.Boss = "Upcoming"
+    end
+    if G.GAME.modifiers.chdp_third_boss and G.GAME.round_resets.blind_states.ChDp_Boss2 == "Upcoming" and (G.GAME.round_resets.blind_states.Boss == "Current" or G.GAME.round_resets.blind_states.ChDp_Boss == "Current") then
+        G.GAME.round_resets.blind_states.ChDp_Boss2 = "Current"
+        G.GAME.round_resets.blind_states.ChDp_Boss = "Upcoming"
+        G.GAME.round_resets.blind_states.Boss = "Upcoming"
+    end
+    return result
+end
+
 local debuff_card_ref = Blind.debuff_card
 function Blind:debuff_card(card, from_blind)
     local result = debuff_card_ref(self,card,from_blind)
@@ -1603,13 +1630,12 @@ SMODS.Sticker{
     pos = {x = 1, y = 0}
 }
 
---[[SMODS.Challenge{
-        loc_txt = "Test",
+SMODS.Challenge{
+        loc_txt = "Fuck You",
         key = 'test',
         rules = {
             custom = {
-                {id = 'chdp_third_boss'},
-                {id = 'second_boss'}
+                {id = 'chdp_third_boss'}
             },
             modifiers = {
             },
@@ -1623,7 +1649,7 @@ SMODS.Sticker{
         },
         }
 
-SMODS.Challenge{
+--[[SMODS.Challenge{
         loc_txt = "Test 2",
         key = 'test_2',
         rules = {

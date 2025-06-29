@@ -111,6 +111,8 @@ return {
             ch_c_enable_scattering_jokers = {"{C:attention}Jokers{} can be {C:attention}Scattering {C:inactive}(Bunco)"},
             ch_c_enable_reactive_jokers = {"{C:attention}Jokers{} can be {C:attention}Reactive {C:inactive}(Bunco)"},
             ch_c_enable_hindered_jokers = {"{C:attention}Jokers{} can be {C:attention}Hindered {C:inactive}(Bunco)"},
+            ch_c_enable_stacked_cards = {"{C:attention}Playing Cards{} can be {C:attention}Stacked {C:inactive}(Opalstuff)"},
+            ch_c_enable_bl_stickers_cards = {"Every {C:attention}Blind Sticker{} for {C:attention}Cards{} is enabled{C:inactive} (Opalstuff)"},
             ch_c_enable_all_stickers = {"Every {C:attention}Joker Sticker{} is enabled"},
         
             ch_c_all_rental_jokers = {"All {C:attention}Jokers{} are {C:attention}Rental {C:inactive}(If compatible)"},
@@ -142,7 +144,7 @@ return {
             ch_c_whitelist_hand = {"{C:attention}#1#{} Hands are whitelisted"},
             ch_c_whitelist_info = {"{C:inactive,S=0.5}Hands that are not whitelisted are {C:red,S=0.5}Disallowed{}"},
 
-            -- MODIFYING BLINDS
+            -- MODIFYING BLINDS AND ANTES
 
             ch_c_disable_small = {'No {C:attention}Small Blinds{} will appear'},
             ch_c_disable_small_ante = {'{C:attention}Small Blinds{} will no longer appear after Ante {C:attention}#1#'},
@@ -150,10 +152,11 @@ return {
             ch_c_disable_big_ante = {'{C:attention}Big Blinds{} will no longer appear after Ante {C:attention}#1#'},
             ch_c_second_boss = {'An {C:attention}additional Boss Blind{} will appear'},
             ch_c_second_boss_ante = {'An {C:attention}Additional Boss Blind{} will appear each Ante, starting Ante {C:attention}#1#'},
-            ch_c_chdp_third_boss = {'An {C:attention}additional Boss Blind{} will appear'},
-            ch_c_chdp_third_boss_ante = {'An {C:attention}Additional Boss Blind{} will appear each Ante, starting Ante {C:attention}#1#'},
+            ch_c_chdp_third_boss = {'Two {C:attention}additional Boss Blinds{} will appear'},
+            ch_c_chdp_third_boss_ante = {'Another {C:attention}Additional Boss Blind{} will appear each Ante, starting Ante {C:attention}#1#'},
             ch_c_disable_skipping = {"{C:attention}Skipping Blinds{} is {C:red}disabled"},
             ch_c_disable_skipping_ante = {"{C:attention}Skipping Blinds{} is {C:red}disabled{} after Ante {C:attention}#1#"},
+            ch_c_chdp_pillar = {"{C:attention}Played Cards{} are {C:red}debuffed{} until the end of the Ante"},
 
             -- SHOP
 
@@ -201,7 +204,13 @@ return {
             ch_c_anaglyph = {'Creates a {C:attention}#1#{} when Boss Blind is defeated'},
 
             ch_c_hidden = {"This challenge is {C:attention}Hidden"}, --Can be used to hide a challenge. It will not count in the totals on the Challenge page.
-            ch_c_dummy_rule = {"Dummy rule"}
+            ch_c_dummy_rule = {"Dummy rule"},
+
+            -- QUIP LINES
+
+            ch_c_pillar_quip = {"{C:inactive,s:0.8}Wait... {C:attention,s:0.8}The Pillar{C:inactive,s:0.8}? Is that you?"},
+            ch_c_pillar_quip_2 = {"{C:attention,s:0.8}The Pillar{C:inactive,s:0.8}! It really is you!"},
+            ch_c_pillar_quip_3 = {"{C:inactive,s:0.8}... What the fuck?"}
         }
     }
 }
