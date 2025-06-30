@@ -120,6 +120,8 @@ function Back:apply_to_run()
 
     G.GAME.modifiers.all_pinned_jokers = false
 
+    G.GAME.modifiers.cannot_sell_stickered = false
+
     -- OTHER CARD MODIFICATIONS
 
     G.GAME.modifiers.disable_suit = {}
@@ -319,6 +321,11 @@ function Back:apply_to_run()
     G.GAME.chaos_editions_cards = G.GAME.chaos_editions
     G.GAME.chaos_editions_jokers[#G.GAME.chaos_editions_jokers+1] = 'negative'
     G.GAME.chaos_rules = {}
+
+    EveryModPrefix = {}
+    for k, v in pairs(SMODS.Mods) do
+        EveryModPrefix[#EveryModPrefix+1] = v.prefix
+    end
 end
 
   local start_run_ref = Game.start_run
@@ -336,7 +343,6 @@ function Game:start_run(args)
                 local whitelistedHands = {}
                 local debuffedSuits = {}
                 local debuffedRanks = {}
-                local blindsForOnlyPillars = G.P_BLINDS
 
                 if _ch.rules.custom then
                     for k, v in ipairs(_ch.rules.custom)do
@@ -510,6 +516,30 @@ function Game:start_run(args)
                     elseif v.id == 'minus_discard_per_joker' then --gain hand per joker
                         G.GAME.modifiers.minus_discard_per_joker = true
 
+                    elseif v.id == 'every_joker' then --open the floodgates
+                        for k2, v2 in pairs(G.P_CENTERS) do
+                            if string.find(k2, "j_") then
+                                add_joker(k2, nil, true)
+                            end
+                        end
+                    elseif v.id == 'every_joker_mod' then --open the floodgates for one mod
+                        for k2, v2 in pairs(G.P_CENTERS) do
+                            if string.find(k2, "j_"..(v.key).."_") then
+                                add_joker(k2, nil, true)
+                            end
+                        end
+
+                    elseif v.id == 'random_jokers' then --5 random jokers...
+                        local EveryFuckingJoker = {}
+                        for k2, v2 in pairs(G.P_CENTERS) do
+                            if string.find(k2, "j_") and v2.rarity == 1 then
+                                EveryFuckingJoker[#EveryFuckingJoker+1] = k2
+                            end
+                        end
+                        for i = 1, v.value do
+                            add_joker(pseudorandom_element(EveryFuckingJoker, pseudoseed("random_jokers")), nil, true)
+                        end
+
                         -- STICKERS
 
                     elseif v.id == 'enable_eternal_jokers' then --these 3 just do the same thing from stakes
@@ -525,24 +555,23 @@ function Game:start_run(args)
                         G.GAME.modifiers['enable_chdp_shrouded'] = true
 
                     elseif v.id == 'enable_scattering_jokers' then --bunco time
-                        G.GAME.modifiers.enable_scattering_in_shop = true
+                        G.GAME.modifiers['enable_bunc_scattering'] = true
                     elseif v.id == 'enable_reactive_jokers' then
-                        G.GAME.modifiers.enable_reactive_in_shop = true
+                        G.GAME.modifiers['enable_bunc_reactive'] = true
                     elseif v.id == 'enable_hindered_jokers' then
-                        G.GAME.modifiers.enable_hindered_in_shop = true
+                        G.GAME.modifiers['enable_bunc_hindered'] = true
 
                     elseif v.id == 'enable_stacked_cards' then -- Opalstuff time?
                         G.GAME.modifiers['enable_opal_stacked'] = true
 
                     elseif v.id == 'enable_all_stickers' then -- enable every sticker
-                        G.GAME.modifiers.enable_eternals_in_shop = true
-                        G.GAME.modifiers.enable_perishables_in_shop = true
-                        G.GAME.modifiers.enable_rentals_in_shop = true
-                        G.GAME.modifiers['enable_chdp_singular'] = true
-                        G.GAME.modifiers['enable_chdp_shrouded'] = true
-                        G.GAME.modifiers.enable_scattering_in_shop = true
-                        G.GAME.modifiers.enable_reactive_in_shop = true
-                        G.GAME.modifiers.enable_hindered_in_shop = true
+                        for k, v in pairs(SMODS.Stickers) do
+                            if v.sets.Joker and k ~= 'cry_hooked' and k ~= 'cry_function_sticker_desc' 
+                            and k ~= "fam_locked" then
+                                print(k)
+                                G.GAME.modifiers['enable_'..k] = true
+                            end
+                        end
 
                     elseif v.id == 'all_rental_jokers' then --every joker is rental
                         G.GAME.modifiers.all_rental_jokers = true
@@ -580,6 +609,9 @@ function Game:start_run(args)
                     elseif v.id == 'all_scattering_jokers' then
                         G.GAME.modifiers.all_scattering_jokers = true
 
+                    elseif v.id == 'cannot_sell_stickered' then
+                        G.GAME.modifiers.cannot_sell_stickered = true
+                    
                         -- SHOP STUFF
 
                     elseif v.id == 'no_vouchers' then --no vouchers appear in shop (NOTE: BAN VOUCHER TAG)
@@ -1404,6 +1436,18 @@ function Card:set_rental(_rental)
     end
 end
 
+local can_sell_card_ref = Card.can_sell_card
+function Card:can_sell_card(context)
+    if G.GAME.modifiers.cannot_sell_stickered then
+        for k, v in pairs(SMODS.Stickers) do
+            if self.ability[k] then
+                return false
+            end
+        end
+    end
+    return can_sell_card_ref(self, context)
+end
+
 -- BLIND.LUA HOOKS
 
 local set_blind_ref = Blind.set_blind
@@ -1627,15 +1671,18 @@ SMODS.Sticker{
     needs_enable_flag = true,
     badge_colour = HEX('54575c'),
     atlas = 'chdpstickers',
-    pos = {x = 1, y = 0}
+    pos = {x = 1, y = 0},
+    apply = function(self, card, layer)
+        card:flip()
+    end
 }
 
---[[SMODS.Challenge{
+SMODS.Challenge{
         loc_txt = "Fuck You",
         key = 'test',
         rules = {
             custom = {
-                {id = 'chdp_third_boss'}
+                {id = 'random_jokers', value = 10}
             },
             modifiers = {
             },
@@ -1649,7 +1696,7 @@ SMODS.Sticker{
         },
         }
 
-SMODS.Challenge{
+--[[SMODS.Challenge{
         loc_txt = "Test 2",
         key = 'test_2',
         rules = {

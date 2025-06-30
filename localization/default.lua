@@ -101,6 +101,9 @@ return {
             ch_c_hand_per_joker = {"For each {C:attention}Joker{}, gain {C:blue}1{} Hand"},
             ch_c_minus_discard_per_joker = {"For each {C:attention}Joker{}, lose {C:red}1{} Discard"},
 
+            ch_c_every_joker = {"Start the run with every {C:attention}Joker{C:inactive} This will probably crash."},
+            ch_c_every_joker_mod = {"Start the run with every {C:attention}Joker{} from {C:attention}#1#"},
+            ch_c_random_jokers = {"Start the run with #1# {C:attention}Random Jokers"},
             -- STICKERS
 
             ch_c_enable_eternal_jokers = {"{C:attention}Jokers{} can be {C:attention}Eternal"},
@@ -131,6 +134,8 @@ return {
             ch_c_perishable_rounds = {"{C:attention}Perishable Jokers{} are debuffed after #1# round(s)"},
 
             ch_c_rentals_keep_price = {"{C:attention}Rental Jokers{} retain their price"},
+            
+            ch_c_cannot_sell_stickered = {"{C:attention}Jokers{} with {C:attention}Stickers{} cannot be sold"},
 
             -- DISABLING RANKS
 
