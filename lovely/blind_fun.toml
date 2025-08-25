@@ -31,10 +31,6 @@ match_indent = true
 payload = '''if G.GAME.modifiers.chdp_pillar and card.ability.played_this_ante then
     card:set_debuff(true)
     return
-end
-if card.ability.opal_stacked and card.ability.played_this_ante then
-    card:set_debuff(true)
-    return
 end'''
 
 # Display Blackjack goal

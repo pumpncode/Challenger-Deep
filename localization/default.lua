@@ -20,6 +20,7 @@ return {
         dictionary = {
             b_rules = 'Rules',
             b_chdp_yggdrasil = 'Yggdrasil Rules',
+            k_chaos_rules = 'Chaos Rules',
             chdp_debuff_hand = '#1# Hands are not allowed',
             chdp_blackjack = 'Cards in hand must add up to 21'
         },
@@ -104,6 +105,7 @@ return {
             ch_c_every_joker = {"Start the run with every {C:attention}Joker{C:inactive} This will probably crash."},
             ch_c_every_joker_mod = {"Start the run with every {C:attention}Joker{} from {C:attention}#1#"},
             ch_c_random_jokers = {"Start the run with #1# {C:attention}Random Jokers"},
+            
             -- STICKERS
 
             ch_c_enable_eternal_jokers = {"{C:attention}Jokers{} can be {C:attention}Eternal"},
@@ -209,13 +211,7 @@ return {
             ch_c_anaglyph = {'Creates a {C:attention}#1#{} when Boss Blind is defeated'},
 
             ch_c_hidden = {"This challenge is {C:attention}Hidden"}, --Can be used to hide a challenge. It will not count in the totals on the Challenge page.
-            ch_c_dummy_rule = {"Dummy rule"},
-
-            -- QUIP LINES
-
-            ch_c_pillar_quip = {"{C:inactive,s:0.8}Wait... {C:attention,s:0.8}The Pillar{C:inactive,s:0.8}? Is that you?"},
-            ch_c_pillar_quip_2 = {"{C:attention,s:0.8}The Pillar{C:inactive,s:0.8}! It really is you!"},
-            ch_c_pillar_quip_3 = {"{C:inactive,s:0.8}... What the fuck?"}
+            ch_c_dummy_rule = {"Dummy rule"}
         }
     }
 }

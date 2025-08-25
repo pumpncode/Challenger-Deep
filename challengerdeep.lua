@@ -155,7 +155,6 @@ function Back:apply_to_run()
     G.GAME.last_chdp2_blind = nil
     G.GAME.chdp_additional_blinds = 0
 
-    G.GAME.modifiers.disable_skipping = false
     G.GAME.modifiers.disable_skipping_ante = -1
 
     G.GAME.modifiers.chdp_pillar = false
@@ -168,145 +167,6 @@ function Back:apply_to_run()
     G.GAME.modifiers.chdp_disable_charms = false
     G.GAME.modifiers.chdp_no_learning_grim = false
 
-    G.GAME.chaos_engine = false
-    G.GAME.chaos_tags = {
-        'uncommon',
-        'rare',
-        'negative',
-        'foil',
-        'holo',
-        'polychrome',
-        'investment',
-        'voucher',
-        'boss',
-        'standard',
-        'charm',
-        'meteor',
-        'buffoon',
-        'handy',
-        'garbage',
-        'coupon',
-        'juggle',
-        'd_six',
-        'top_up',
-        'skip',
-        'economy',
-        'ethereal'
-    }
-    G.GAME.chaos_editions = {
-        'foil',
-        'holo',
-        'polychrome'
-    }
-    G.GAME.chaos_hands = {
-        'High Card',
-        'Pair',
-        'Two Pair',
-        'Full House',
-        'Flush',
-        'Straight',
-        'Straight Flush',
-        'Three of a Kind',
-        'Four of a Kind',
-        'Five of a Kind',
-        'Flush Five',
-        'Flush House'
-    }
-    G.GAME.chaos_engine_rules = {
-        {id = 'no_vouchers'},
-        {id = 'enable_eternal_jokers'},
-        {id = 'enable_rental_jokers'},
-        {id = 'enable_perishable_jokers'},
-        {id = 'inflation'},
-        {id = 'no_interest'},
-        {id = 'no_extra_hand_money'},
-        {id = 'no_shop_jokers'}
-    }
-
-    if (SMODS.Mods.Bunco or {}).can_load then --add bunco stuff
-        local chaos_bunc_tags = {
-            'bunc_breaking',
-            'bunc_arcade',
-            'bunc_glitter',
-            'bunc_fluorescent',
-            'bunc_filigree',
-        }
-        for k, v in ipairs(chaos_bunc_tags) do
-            G.GAME.chaos_tags[#G.GAME.chaos_tags+1] = v
-        end
-        local chaos_bunc_editions = {
-            'fluorescent',
-            'glitter'
-        }
-        for k, v in ipairs(chaos_bunc_editions) do
-            G.GAME.chaos_editions[#G.GAME.chaos_editions+1] = v
-        end
-        local chaos_bunc_rules = {
-            {id = 'enable_scattering_jokers'},
-            {id = 'enable_reactive_jokers'},
-            {id = 'enable_hindered_jokers'},
-            {id = 'disable_hand_containing', value = 'Spectrum', hand = 'bunc_Spectrum'}
-        }
-        for k, v in ipairs(chaos_bunc_rules) do
-            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = v
-        end
-    end
-
-    if (SMODS.Mods.Cryptid or {}).can_load then -- check for cryptid, add chaos rules/tags
-        local cryptid_config = SMODS.load_mod_config({id = "Cryptid", path = SMODS.Mods.Cryptid.path}) -- add cryptid config
-        if cryptid_config["Tags"] then
-            local chaos_cry_tags = {
-                'cry_cat',
-                'cry_schematic',
-                'cry_gambler',
-                'cry_empowered',
-                'cry_bundle',
-                'cry_banana',
-                'cry_scope',
-                'cry_gourmand',
-                'cry_bettertop_up',
-                'cry_booster'
-            }
-            if cryptid_config["Epic Jokers"] then
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_epic'
-            end
-            if cryptid_config["Vouchers"] then
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_better_voucher'
-            end
-            if cryptid_config["Misc."] then
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_glitched'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_oversat'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_mosaic'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_gold'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_glass'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_blur'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_astral'
-                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_loss'
-                if cryptid_config["M Jokers"] then
-                    chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_m'
-                end
-            end
-            for k, v in ipairs(chaos_cry_tags) do
-                G.GAME.chaos_tags[#G.GAME.chaos_tags+1] = v
-            end
-        end
-        if cryptid_config["Misc."] then
-            local chaos_cry_rules = {
-                'mosaic',
-                'glitched',
-                'oversat',
-                'gold',
-                'glass',
-                'blur',
-                'astral',
-                'm',
-            }
-            for k, v in ipairs(chaos_cry_rules) do
-                G.GAME.chaos_editions[#G.GAME.chaos_editions+1] = v
-            end
-        end
-    end
-
     if (SMODS.Mods["Talisman"] or {}).can_load then --talisman is here
         G.GAME.modifiers.chdp_talisman_check = true
     end
@@ -316,11 +176,6 @@ function Back:apply_to_run()
         G.GAME.modifiers.chdp_ygg_min_mats = 1
         G.GAME.modifiers.chdp_ygg_max_mats = 3
     end
-
-    G.GAME.chaos_editions_jokers = G.GAME.chaos_editions
-    G.GAME.chaos_editions_cards = G.GAME.chaos_editions
-    G.GAME.chaos_editions_jokers[#G.GAME.chaos_editions_jokers+1] = 'negative'
-    G.GAME.chaos_rules = {}
 
     EveryModPrefix = {}
     for k, v in pairs(SMODS.Mods) do
@@ -433,7 +288,7 @@ end
 
 local create_tabs_ref = create_tabs
 function create_tabs(args)
-if args and args["tabs"] and is_in_run_info_tab and G.GAME.challenge then
+if args and args["tabs"] and is_in_run_info_tab and (G.GAME.challenge or G.GAME.modifiers.chaos_engine or G.GAME.modifiers.chaos_engine_all) then
     args.tabs[#args.tabs + 1] = {
         label = localize('b_rules'),
         tab_definition_function = function()
@@ -541,6 +396,26 @@ function G.UIDEF.run_rules()
         override_rule_list,starting_rule_list
       }}
     }}
+    elseif G.GAME and G.GAME.chaos_rules then
+        local game_rules = {}
+        for k, v in ipairs(G.GAME.chaos_rules) do
+            if v.value then
+                game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {v.value}}}
+            else
+                game_rules[#game_rules+1] = {n=G.UIT.R, config={align = "cl"}, nodes= localize{type = 'text', key = 'ch_c_'..v.id, vars = {}}}
+            end
+        end
+        local override_rule_list = {n=G.UIT.C, config={align = "cm", minw = 3, r = 0.1, colour = G.C.RED}, nodes={
+            {n=G.UIT.R, config={align = "cm", padding = 0.08, minh = 0.6}, nodes={
+                {n=G.UIT.T, config={text = localize('k_chaos_rules'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+            }},
+            {n=G.UIT.R, config={align = "cm", minh = 4.1, minw = 6.8, maxw = 6.7, padding = 0.05, r = 0.1, colour = G.C.WHITE}, nodes= game_rules}
+        }}
+        return {n=G.UIT.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, nodes={
+            {n=G.UIT.C, config={align = "cm", padding = 0.1, colour = G.C.L_BLACK, r = 0.1, minw = 3}, nodes={
+                override_rule_list
+            }}
+        }}
     end
 end
 
@@ -1000,6 +875,217 @@ if YGGDRASIL.can_load then
         return ygg_skill_unlocked(e)
     end
 end
+
+-- wait... these are MY functions??? wtf???
+
+CHDP = SMODS.current_mod
+
+CHDP.setup_chaos_run = function()
+G.GAME.chaos_tags = {
+        'uncommon',
+        'rare',
+        'negative',
+        'foil',
+        'holo',
+        'polychrome',
+        'investment',
+        'voucher',
+        'boss',
+        'standard',
+        'charm',
+        'meteor',
+        'buffoon',
+        'handy',
+        'garbage',
+        'coupon',
+        'juggle',
+        'd_six',
+        'top_up',
+        'skip',
+        'economy',
+        'ethereal'
+    }
+    G.GAME.chaos_editions = {
+        'foil',
+        'holo',
+        'polychrome'
+    }
+    G.GAME.chaos_hands = {
+        'High Card',
+        'Pair',
+        'Two Pair',
+        'Full House',
+        'Flush',
+        'Straight',
+        'Straight Flush',
+        'Three of a Kind',
+        'Four of a Kind',
+        'Five of a Kind',
+        'Flush Five',
+        'Flush House'
+    }
+    G.GAME.chaos_engine_rules = {
+        {id = 'no_vouchers'},
+        {id = 'enable_eternal_jokers'},
+        {id = 'enable_rental_jokers'},
+        {id = 'enable_perishable_jokers'},
+        {id = 'inflation'},
+        {id = 'no_interest'},
+        {id = 'no_extra_hand_money'},
+        {id = 'no_shop_jokers'}
+    }
+
+    if (SMODS.Mods.Bunco or {}).can_load then --add bunco stuff
+        local chaos_bunc_tags = {
+            'bunc_breaking',
+            'bunc_arcade',
+            'bunc_glitter',
+            'bunc_fluorescent',
+            'bunc_filigree',
+        }
+        for k, v in ipairs(chaos_bunc_tags) do
+            G.GAME.chaos_tags[#G.GAME.chaos_tags+1] = v
+        end
+        local chaos_bunc_editions = {
+            'fluorescent',
+            'glitter'
+        }
+        for k, v in ipairs(chaos_bunc_editions) do
+            G.GAME.chaos_editions[#G.GAME.chaos_editions+1] = v
+        end
+        local chaos_bunc_rules = {
+            {id = 'enable_scattering_jokers'},
+            {id = 'enable_reactive_jokers'},
+            {id = 'enable_hindered_jokers'},
+            {id = 'disable_hand_containing', value = 'Spectrum', hand = 'bunc_Spectrum'}
+        }
+        for k, v in ipairs(chaos_bunc_rules) do
+            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = v
+        end
+    end
+
+    if (SMODS.Mods.Cryptid or {}).can_load then -- check for cryptid, add chaos rules/tags
+        local cryptid_config = SMODS.load_mod_config({id = "Cryptid", path = SMODS.Mods.Cryptid.path}) -- add cryptid config
+        if cryptid_config["Tags"] then
+            local chaos_cry_tags = {
+                'cry_cat',
+                'cry_schematic',
+                'cry_gambler',
+                'cry_empowered',
+                'cry_bundle',
+                'cry_banana',
+                'cry_scope',
+                'cry_gourmand',
+                'cry_bettertop_up',
+                'cry_booster'
+            }
+            if cryptid_config["Epic Jokers"] then
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_epic'
+            end
+            if cryptid_config["Vouchers"] then
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_better_voucher'
+            end
+            if cryptid_config["Misc."] then
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_glitched'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_oversat'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_mosaic'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_gold'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_glass'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_blur'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_astral'
+                chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_loss'
+                if cryptid_config["M Jokers"] then
+                    chaos_cry_tags[#chaos_cry_tags + 1] = 'cry_m'
+                end
+            end
+            for k, v in ipairs(chaos_cry_tags) do
+                G.GAME.chaos_tags[#G.GAME.chaos_tags+1] = v
+            end
+        end
+        if cryptid_config["Misc."] then
+            local chaos_cry_rules = {
+                'mosaic',
+                'glitched',
+                'oversat',
+                'gold',
+                'glass',
+                'blur',
+                'astral',
+                'm',
+            }
+            for k, v in ipairs(chaos_cry_rules) do
+                G.GAME.chaos_editions[#G.GAME.chaos_editions+1] = v
+            end
+        end
+    end
+    G.GAME.chaos_editions_jokers = G.GAME.chaos_editions
+    G.GAME.chaos_editions_cards = G.GAME.chaos_editions
+    G.GAME.chaos_editions_jokers[#G.GAME.chaos_editions_jokers+1] = 'negative'
+    G.GAME.chaos_rules = {}
+
+local chaos_value_rules = {
+        {id = 'blind_scaling', const = 0.5, mult = 3.5, round = false},
+        {id = 'all_shop_scaling', const = 0.75, mult = 2, round = false},
+        {id = 'win_ante', const = (G.GAME.win_ante or 8) - 2, mult = 6, round = true, dp = 1},
+        {id = 'money_total_scaling', const = 25, mult = 100, round = true, dp = 100}
+    }
+    for k, v in ipairs(chaos_value_rules) do --add chaos_value_rules randomised
+        local rnd_num = math.random()
+        if v.round == true then
+            if rnd_num*v.mult % 1 < 0.5 then
+                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = v.id, value = math.floor(v.const + (rnd_num*v.mult))/v.dp}
+            else
+                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = v.id, value = math.ceil(v.const + (rnd_num*v.mult))/v.dp}
+            end
+        else
+            G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = v.id, value = v.const + (rnd_num*v.mult)}
+        end
+    end
+
+                        local chaos_number = math.random()
+                        for k, v in ipairs(G.GAME.chaos_tags) do --choose a random tag to add as anaglyph rule to the chaos engine
+                            if chaos_number < k/#G.GAME.chaos_tags then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'anaglyph', value = localize{type = 'name_text', set = 'Tag', key = 'tag_'..v, nodes = {}}, tag = v}
+                                break
+                            end
+                        end
+
+                        local chaos_number = math.random()
+                        for k, v in ipairs(G.GAME.chaos_editions_cards) do --choose a random playing card edition to add as a ban
+                            if chaos_number < k/#G.GAME.chaos_editions_cards then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'_cards', edition_type = 'cards'}
+                                table.remove(G.GAME.chaos_editions_cards, k)
+                                break
+                            end
+                        end
+
+                        local chaos_number = math.random()
+                        for k, v in ipairs(G.GAME.chaos_editions) do --choose a random edition to add as a ban for every card
+                            if chaos_number < k/#G.GAME.chaos_editions then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'s', edition_type = 'all'}
+                                table.remove(G.GAME.chaos_editions, k)
+                                break
+                            end
+                        end
+
+                        local chaos_number = math.random()
+                        for k, v in ipairs(G.GAME.chaos_editions_jokers) do --choose a random joker edition to add as a ban
+                            if chaos_number < k/#G.GAME.chaos_editions_jokers then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'no_'..v..'_jokers', edition_type = 'jokers'}
+                                table.remove(G.GAME.chaos_editions_jokers, k)
+                                break
+                            end
+                        end
+
+                        local chaos_number = math.random()
+                        for k, v in ipairs(G.GAME.chaos_hands) do --choose a random hand to ban
+                            if chaos_number < k/#G.GAME.chaos_hands then
+                                G.GAME.chaos_engine_rules[#G.GAME.chaos_engine_rules+1] = {id = 'disable_hand', value = v, hand = v}
+                                break
+                            end
+                        end
+end
+
 --HAVE A STICKER
 
 SMODS.Sticker{
